@@ -35,6 +35,7 @@ public class Bullet : MonoBehaviour
         if (Vector3.Distance(startingPosition, transform.position) >= _range)
         {
             Destroy(gameObject);
+            Debug.Log(message: "bullet ded");
         }
     }
 }
