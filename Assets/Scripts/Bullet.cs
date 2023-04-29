@@ -5,19 +5,18 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [SerializeField]
-    private float _bulletSpeed = 20f;
-    [SerializeField]
-    private GameObject _prefab_sphere;
+    private float _bulletSpeed = 1f;
     [SerializeField]
     private float _range;
 
-    public Vector3 direction;
+    private Vector3 direction;
     private Vector3 startingPosition; // The starting position of the bullet
 
     private void Start()
     {
         // Store the starting position of the bullet
         startingPosition = transform.position;
+        direction = transform.up;
     }
 
     // Update is called once per frame
@@ -38,4 +37,6 @@ public class Bullet : MonoBehaviour
             Debug.Log(message: "bullet ded");
         }
     }
+
+
 }
