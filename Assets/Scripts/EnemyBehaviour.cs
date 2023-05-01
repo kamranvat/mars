@@ -10,6 +10,8 @@ public class EnemyBehaviour : MonoBehaviour
     private float _enemySpeed = 1f;
     [SerializeField]
     private float _thrustPower = 0.1f; // power of thrust
+    [SerializeField]
+    public int _hp = 20;
     [SerializeField] // for debugging only
     private Vector2 _center = Vector2.zero;
     [SerializeField]
@@ -59,24 +61,21 @@ public class EnemyBehaviour : MonoBehaviour
     // Collision with bullets and planets
     void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log(message: "in fct" + other);
         // Test collisions
         if (other.CompareTag("Bullet"))
         {
-            Debug.Log(message: "Bullet");
             Destroy(other.gameObject);
 
         }
 
         if (other.CompareTag("Planet"))
         {
-            Debug.Log(message: "Player");
             //other.GetComponent<PlayerScript>().Damage();
         }
 
         // For now, destroy after collision 
         // TODO: enemy health bar
-        Destroy(gameObject);
+        //Destroy(gameObject);
 
     }
 

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class Turret : MonoBehaviour
 {
@@ -16,13 +17,11 @@ public class Turret : MonoBehaviour
     [SerializeField]
     private float _rateOfScan = 10; // if no enemy is present, how often per s should we check for enemies
 
-    // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(Shoot());
     }
 
-    // Update is called once per 
     void Update()
     {
     }
@@ -87,8 +86,6 @@ public class Turret : MonoBehaviour
 
 
         }
-
-        //yield return null;
 
     }
 }

@@ -12,8 +12,8 @@ public class Bullet : MonoBehaviour
     [SerializeField]
     private Rigidbody2D RB;
 
-    private Vector3 direction;
-    private Vector3 startingPosition;
+    private Vector2 direction;
+    private Vector2 startingPosition;
 
     private void Start()
     {
@@ -34,7 +34,7 @@ public class Bullet : MonoBehaviour
     void MaxRange()
     {
         // Destroy after it reaches this range
-        if (Vector3.Distance(startingPosition, transform.position) >= _range)
+        if (Vector2.Distance(startingPosition, (Vector2)transform.position) >= _range)
         {
             Destroy(gameObject);
         }
