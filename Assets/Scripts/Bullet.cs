@@ -9,8 +9,11 @@ public class Bullet : MonoBehaviour
     [SerializeField]
     private float _range;
 
+    [SerializeField]
+    private Rigidbody2D RB;
+
     private Vector3 direction;
-    private Vector3 startingPosition; // The starting position of the bullet
+    private Vector3 startingPosition;
 
     private void Start()
     {
@@ -19,7 +22,7 @@ public class Bullet : MonoBehaviour
         direction = transform.up;
     }
 
-    // Update is called once per frame
+
     void Update()
     {
 
@@ -30,11 +33,10 @@ public class Bullet : MonoBehaviour
 
     void MaxRange()
     {
-        // TODO: kill after it reaches the range. hypothenuse
+        // Destroy after it reaches this range
         if (Vector3.Distance(startingPosition, transform.position) >= _range)
         {
             Destroy(gameObject);
-            Debug.Log(message: "bullet ded");
         }
     }
 

@@ -30,7 +30,12 @@ public class EnemySpawner : MonoBehaviour
     {
         //generate six spawnpoints where enemies can come from, pass which spawnpoint 
         //i want the current group to come from into here.
+
         //also make the wave spawn in groups and keep count of the total number
+
+        //give each group a (similar between members) initial velocity parallel to the circle defined
+        //by the distance d to the center, d such that it is out of view
+
         //also have different types of groups later to spawn different swarms
 
         while (!_dead)
