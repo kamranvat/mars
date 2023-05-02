@@ -17,13 +17,13 @@ public class EnemySpawner : MonoBehaviour
     private bool _dead = false;
 
     [SerializeField] // for debugging
-    public int _level = 1;
+    public int _currentLevel = 1;
 
     [SerializeField]
-    private int _level_hp = 1000;
+    private int _levelTotalHp = 1000;
 
     [SerializeField]
-    private int currentWave = 1;
+    private int _currentWave = 1;
      
 
     // Start is called before the first frame update
@@ -46,19 +46,19 @@ public class EnemySpawner : MonoBehaviour
 
     }
 
-    private Array waveHealthDistribution(int n, int level_hp)
+    private int[] waveHealthDistribution(int length, int level_hp)
     {
-        // Returns an array of values that sum up to 100, representing the total hp of each wave in this level.
+        // Returns an array[length] of values that sum up to level_hp, representing the total hp of each wave in this level.
         // Values are taken from a linear function and normalised such that each wave is stronger than the previous
 
-        int[] distr = new int[n];
-        float step = 1f / (n - 1); // Difference between each element
+        int[] distr = new int[length];
+        float step = 1f / (length - 1); // Difference between each element
 
         float t = 0f;
 
         Debug.Log(message: "Wave health init...");
 
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < length; i++)
         {
             float value = Mathf.Lerp(0f, level_hp, t); // interpolate value between 0 and total
             distr[i] = Mathf.RoundToInt(value); // round to integer
@@ -67,11 +67,18 @@ public class EnemySpawner : MonoBehaviour
         }
 
         // handle rounding error by adding remaining value to last element
-        distr[n - 1] += level_hp;
+        distr[length - 1] += level_hp;
 
         Debug.Log(message: "Wave health initialized. Values: " + distr);
         return distr;
 
+    }
+
+    private void spawnGroupSelector()
+    {
+        // Have another fct that decides which enemies  are "active" based on the level.
+        // Pass the list of active enemies (arr of string) in here, choose one at random,
+        // and call spawnGroup with the right parameters 
     }
 
     private void spawnGroup(int memberAmount, Vector2 spawnPoint, GameObject objectToSpawn)
@@ -81,32 +88,45 @@ public class EnemySpawner : MonoBehaviour
         // TODO: make random velocity, assign to each member  within the for loop
         //give each group a (similar between members) initial velocity parallel to the circle defined
         //by the distance d to the center, d such that it is out of view
-        Debug.Log("...");
         for (int i = 0; i <= memberAmount; i++)
         {
             // using unityengine.random to clarify between this and system.random
             // Spawn at spawnpoint plus random offset
             Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
-            Debug.Log(".!!.");
-
-            Debug.Log("!!!!");
         }
 ;
     }
-    IEnumerator SpawnSystem()
+
+    private Vector2 chooseSpawnpoint()
     {
-        //generate six spawnpoints where enemies can come from, pass which spawnpoint 
-        //i want the current group to come from into here.
-        // for now, just hardcode a few of them in here.
-        //TODO make a dedicated fct that returns one random spawnpoint
-        int enemyHp = 20;
-        Vector2[] spawnPointArray = new Vector2[4];
+        //TODO make it choose one spawnpoint at random
+
+        /*Vector2[] spawnPointArray = new Vector2[4];
 
         spawnPointArray[0] = new Vector2(8, 4);
         spawnPointArray[1] = new Vector2(-8, 4);
         spawnPointArray[2] = new Vector2(8, -4);
-        spawnPointArray[3] = new Vector2(-8, -4);
+        spawnPointArray[3] = new Vector2(-8, -4);*/
+
+        return new Vector2(8, 4);
+    }
+
+    private bool isWaveAlive()
+    {
+        // should only be false if the last group has been spawned and all enemies are dead
+        return true;
+    }
+
+
+    IEnumerator SpawnSystem()
+    {
+
+        int enemyHp = 20;
+        int waveAmount = _currentLevel / 2 + 1;
+        int[] currentLevelWaves = waveHealthDistribution(5, _levelTotalHp); // 5 for debugging, waveAmount otherwíse
+
+        Debug.Log(currentLevelWaves[0]);
        
 
         //also have different types of groups later to spawn different swarms
@@ -125,9 +145,9 @@ public class EnemySpawner : MonoBehaviour
         {
             int totalHp = 0;
             int maxHp = 1000; // add waveHealthDIst fct here
+
             // Spawn a group and track how much hp they had
-            Debug.Log("spawning..." + _enemyPrefab);
-            spawnGroup(5, spawnPointArray[0], _enemyPrefab);
+            spawnGroup(5, chooseSpawnpoint(), _enemyPrefab);
             int spawned_hp = totalHp + enemyHp;
             Debug.Log(spawned_hp);
 

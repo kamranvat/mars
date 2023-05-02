@@ -60,19 +60,37 @@ public class Turret : MonoBehaviour
             {
 
                 // Calculate the direction to the closest enemy
-                Vector3 direction = closestEnemy.transform.position - transform.position;
+                //Vector3 direction = closestEnemy.transform.position - transform.position;
 
                 // Rotate the turret towards the closest object on the z-axis
                 // TODO: convert this all to a vector2 thing and make the following line simpler
-                Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
-                transform.rotation = rotation;
+                //Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
+                //transform.rotation = rotation;
+
+                
+
+                // Spawn the bullet in the turret for now - to avoid bad aim
+                // Note: aim is still bad. TODO find out why
+
+                /* Raimi:
+                float angle = 0;
+
+                Vector3 relative = transform.InverseTransformPoint(closestEnemy.transform.position);
+                angle = Mathf.Atan2(relative.x, relative.y) * Mathf.Rad2Deg;
+                transform.Rotate(0, 0, -angle);
+                */
+
+                /* ABerlemont:
+                 */
+                Vector3 direction = Input.mousePosition;
+                direction.z = -Camera.main.transform.position.z;
+                direction = Camera.main.ScreenToWorldPoint(direction) - transform.position;
+                transform.rotation = Quaternion.LookRotation(transform.forward, direction);
 
                 // Spawn the bullet slightly above the turret
                 //Vector3 spawnPos = transform.position + direction.normalized * 2f;
 
-                // Spawn the bullet in the turret for now - to avoid bad aim
-                // Note: aim is still bad. TODO find out why
-                Vector3 spawnPos = transform.position;
+                Vector3 spawnPos = transform.position + transform.forward.normalized;
                 Instantiate(_bulletPrefab, spawnPos, transform.rotation);
 
                 yield return new WaitForSeconds(_fireDelay);

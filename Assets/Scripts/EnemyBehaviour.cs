@@ -65,6 +65,8 @@ public class EnemyBehaviour : MonoBehaviour
         if (other.CompareTag("Bullet"))
         {
             Destroy(other.gameObject);
+            Destroy(this.gameObject);
+            Debug.Log("ded");
 
         }
 
