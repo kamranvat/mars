@@ -75,6 +75,14 @@ public class EnemyBehaviour : MonoBehaviour
             //other.GetComponent<PlayerScript>().Damage();
         }
 
+        // If they spawn on top of each other, push each other away so that the groups look nice
+        if (other.CompareTag("Enemy"))
+        {
+            Vector2 direction = other.gameObject.transform.position - transform.position;
+            RB.AddForce(-direction.normalized * 500f);
+            other.gameObject.GetComponent<Rigidbody2D>().velocity += direction.normalized * 0.05f;
+        }
+
         // For now, destroy after collision 
         // TODO: enemy health bar
         //Destroy(gameObject);

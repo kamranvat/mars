@@ -77,13 +77,13 @@ public class EnemySpawner : MonoBehaviour
     private void spawnGroupSelector()
     {
         // Have another fct that decides which enemies  are "active" based on the level.
-        // Pass the list of active enemies (arr of string) in here, choose one at random,
+        // Pass the list of active enemies (string[]) in here, choose one at random,
         // and call spawnGroup with the right parameters 
     }
 
     private void spawnGroup(int memberAmount, Vector2 spawnPoint, GameObject objectToSpawn)
     {
-        float dist = 1f;
+        float dist = 5f;
 
         // TODO: make random velocity, assign to each member  within the for loop
         //give each group a (similar between members) initial velocity parallel to the circle defined
@@ -115,6 +115,12 @@ public class EnemySpawner : MonoBehaviour
     private bool isWaveAlive()
     {
         // should only be false if the last group has been spawned and all enemies are dead
+        return true;
+    }
+
+    private bool isLevelActive() 
+    { 
+        // should return true if either the player dies or the last wave of a level is dead
         return true;
     }
 
@@ -152,6 +158,87 @@ public class EnemySpawner : MonoBehaviour
             Debug.Log(spawned_hp);
 
             yield return new WaitForSeconds(_delay);
+
+        }
+
+        yield return null;
+
+    }
+
+    IEnumerator LevelSystem()
+    {
+        // current level stats
+        int enemyHp = 20;
+        int waveAmount = _currentLevel / 2 + 1;
+        int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp); // 5 for debugging, waveAmount otherwíse
+        int currentWaveNr = 0;
+        bool levelActive = isLevelActive();
+
+        bool levelWon = false;
+        bool levelLost = false;
+        
+        Debug.Log(currentLevelWaves[0] + _currentLevel);
+
+
+        //also have different types of groups later to spawn different swarms
+        // TODO group selector fct that selects the spawn group and spawns it with the right vals
+
+        // IN CONCLUSION 
+        // what I want is:
+        /* For each level spawn level/2 + 1 waves
+         *      for each wave spawn x groups
+         *              each group consists of z members and spawns together
+         * x is based on total hp
+         * groups are manually defined, such that they are similarly strong but feel different
+         */
+
+        // Make the waves
+        while (levelActive)
+        {
+
+            if (levelWon)
+            {
+                // on level win:
+                _currentLevel += 1;
+                levelActive = false;
+                Debug.Log(message: "level won");
+            }
+
+            if (levelLost)
+            {
+                // on level loss:
+                levelActive = false;
+                Debug.Log(message: "level lost");
+            } // honestly i think I should check for player death in update() and stop calling the subroutines here if it happens
+
+            while ((currentWaveNr <= currentLevelWaves.Length) && !levelLost)
+            {
+                
+                // Spawn groups in regular intervals until the wave is over
+                int spawnedHp = 0; 
+                int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
+
+                while ((spawnedHp < waveHp) && !levelLost)
+                {
+                    spawnGroup(5, chooseSpawnpoint(), _enemyPrefab); // TODO replace this with spawnGroupSelector once implemented
+                    int spawned_hp = spawnedHp + enemyHp;
+                    Debug.Log(spawned_hp);
+                    yield return new WaitForSeconds(_delay);
+                }
+
+                // Monitor the wave - the last enemies should be on the map now
+                // while(true){check if enemies alive} -> as soon as not, or 30s pass, levelWon = true
+                // If the wave dies -> wait, then next wave
+                // If the wave dies && it was the last wave -> levelWon
+            }
+
+        }
+
+
+        
+        while (!_dead)
+        {
+
 
         }
 
