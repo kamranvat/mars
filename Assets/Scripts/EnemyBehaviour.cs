@@ -10,6 +10,10 @@ public class EnemyBehaviour : MonoBehaviour
     private float _enemySpeed = 1f;
     [SerializeField]
     private float _thrustPower = 0.1f; // power of thrust
+
+    [SerializeField]
+    private float _pushApart = 0.1f; // Enemies pushing each other apart
+
     [SerializeField]
     public int _hp = 20;
     [SerializeField] // for debugging only
@@ -79,8 +83,8 @@ public class EnemyBehaviour : MonoBehaviour
         if (other.CompareTag("Enemy"))
         {
             Vector2 direction = other.gameObject.transform.position - transform.position;
-            RB.AddForce(-direction.normalized * 500f);
-            other.gameObject.GetComponent<Rigidbody2D>().velocity += direction.normalized * 0.05f;
+            RB.AddForce(-direction.normalized * _pushApart);
+            other.gameObject.GetComponent<Rigidbody2D>().velocity += direction.normalized * _pushApart;
         }
 
         // For now, destroy after collision 

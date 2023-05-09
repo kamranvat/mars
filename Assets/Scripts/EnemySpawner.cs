@@ -11,22 +11,30 @@ public class EnemySpawner : MonoBehaviour
     //later, add delay = 1/rate and an amount 
     [SerializeField]
     private GameObject _enemyPrefab;
+
     [SerializeField]
     private float _delay = 1f;
+
+    [SerializeField]
+    private int _groupSize = 5;
+
     [SerializeField]
     private bool _dead = false;
 
     [SerializeField] // for debugging
     public int _currentLevel = 1;
 
-    [SerializeField]
+    [SerializeField] // for debugging, read these values out of a list later
     private int _levelTotalHp = 1000;
+    [SerializeField]
+    private int _levelSpawnedHp = 0;
 
     [SerializeField]
     private int _currentWave = 1;
-     
+    
+    // To get hp
+    private EnemyBehaviour enemyBehaviour;
 
-    // Start is called before the first frame update
     void Start()
     {
 
@@ -35,12 +43,12 @@ public class EnemySpawner : MonoBehaviour
         //EnemyBehaviour = GameObject.Find("Enemy1").GetComponent<EnemyBehaviour>();
         //int enemyHp = EnemyBehaviour._hp;
         //Debug.Log("YOYOYO" + enemyHp);
+        
+        enemyBehaviour = _enemyPrefab.GetComponent<EnemyBehaviour>();
 
-
-        StartCoroutine(SpawnSystem());
+        StartCoroutine(LevelSystem());
     }
 
-    // Update is called once per frame
     void Update()
     {
 
@@ -81,8 +89,13 @@ public class EnemySpawner : MonoBehaviour
         // and call spawnGroup with the right parameters 
     }
 
-    private void spawnGroup(int memberAmount, Vector2 spawnPoint, GameObject objectToSpawn)
+    private void spawnGroup(int memberAmount, int memberHp, Vector2 spawnPoint, GameObject objectToSpawn)
     {
+
+        // Return spawned enemies to check if they are still alive later
+        // I don't know how much sense this makes.
+        // alright the internet basically says this is dumb
+        //List<GameObject> spawnedObjects = new List<GameObject>();
         float dist = 5f;
 
         // TODO: make random velocity, assign to each member  within the for loop
@@ -94,10 +107,13 @@ public class EnemySpawner : MonoBehaviour
             // Spawn at spawnpoint plus random offset
             Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
+            _levelSpawnedHp += memberHp; 
         }
-;
+        //return spawnedObjects;
     }
 
+
+    // TODO: build functionality
     private Vector2 chooseSpawnpoint()
     {
         //TODO make it choose one spawnpoint at random
@@ -112,12 +128,15 @@ public class EnemySpawner : MonoBehaviour
         return new Vector2(8, 4);
     }
 
+    // TODO: build functionality
     private bool isWaveAlive()
     {
         // should only be false if the last group has been spawned and all enemies are dead
+        // handle this by making "waveOver" a public variable
         return true;
     }
 
+    // TODO: build functionality
     private bool isLevelActive() 
     { 
         // should return true if either the player dies or the last wave of a level is dead
@@ -153,7 +172,7 @@ public class EnemySpawner : MonoBehaviour
             int maxHp = 1000; // add waveHealthDIst fct here
 
             // Spawn a group and track how much hp they had
-            spawnGroup(5, chooseSpawnpoint(), _enemyPrefab);
+            //spawnGroup(5, chooseSpawnpoint(), _enemyPrefab);
             int spawned_hp = totalHp + enemyHp;
             Debug.Log(spawned_hp);
 
@@ -165,18 +184,20 @@ public class EnemySpawner : MonoBehaviour
 
     }
 
+
     IEnumerator LevelSystem()
     {
         // current level stats
-        int enemyHp = 20;
+        int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check if others are added
         int waveAmount = _currentLevel / 2 + 1;
-        int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp); // 5 for debugging, waveAmount otherwíse
+        int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
         int currentWaveNr = 0;
         bool levelActive = isLevelActive();
 
         bool levelWon = false;
         bool levelLost = false;
         
+        Debug.Log("currentLevelWaves[0] and currentLevel:");
         Debug.Log(currentLevelWaves[0] + _currentLevel);
 
 
@@ -211,18 +232,21 @@ public class EnemySpawner : MonoBehaviour
                 Debug.Log(message: "level lost");
             } // honestly i think I should check for player death in update() and stop calling the subroutines here if it happens
 
-            while ((currentWaveNr <= currentLevelWaves.Length) && !levelLost)
+            while ((currentWaveNr < currentLevelWaves.Length) && !levelLost)
             {
                 
+
                 // Spawn groups in regular intervals until the wave is over
                 int spawnedHp = 0; 
                 int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
+                // List<GameObject> spawnedEnemies = new List<GameObject>();
 
                 while ((spawnedHp < waveHp) && !levelLost)
                 {
-                    spawnGroup(5, chooseSpawnpoint(), _enemyPrefab); // TODO replace this with spawnGroupSelector once implemented
-                    int spawned_hp = spawnedHp + enemyHp;
-                    Debug.Log(spawned_hp);
+                    //spawnedEnemies.Add(spawnGroup(5, chooseSpawnpoint(), _enemyPrefab)); // TODO replace this with spawnGroupSelector once implemented
+                    spawnGroup(memberAmount:_groupSize, memberHp:enemyHp, spawnPoint:chooseSpawnpoint(), objectToSpawn:_enemyPrefab);
+                    spawnedHp += enemyHp * _groupSize;
+                    Debug.Log("spawned hp:" );
                     yield return new WaitForSeconds(_delay);
                 }
 
@@ -231,14 +255,6 @@ public class EnemySpawner : MonoBehaviour
                 // If the wave dies -> wait, then next wave
                 // If the wave dies && it was the last wave -> levelWon
             }
-
-        }
-
-
-        
-        while (!_dead)
-        {
-
 
         }
 
