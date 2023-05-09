@@ -70,7 +70,7 @@ public class EnemyBehaviour : MonoBehaviour
         {
             Destroy(other.gameObject);
             Destroy(this.gameObject);
-            Debug.Log("ded");
+            // Debug.Log("ded");
 
         }
 

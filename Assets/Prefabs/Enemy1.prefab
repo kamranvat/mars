@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _enemySpeed: 1
   _thrustPower: 0.1
+  _pushApart: 0.1
   _hp: 20
   _center: {x: 0, y: 0}
   RB: {fileID: 7286724299965165293}

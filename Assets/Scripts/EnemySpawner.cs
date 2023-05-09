@@ -144,47 +144,6 @@ public class EnemySpawner : MonoBehaviour
     }
 
 
-    IEnumerator SpawnSystem()
-    {
-
-        int enemyHp = 20;
-        int waveAmount = _currentLevel / 2 + 1;
-        int[] currentLevelWaves = waveHealthDistribution(5, _levelTotalHp); // 5 for debugging, waveAmount otherwíse
-
-        Debug.Log(currentLevelWaves[0]);
-       
-
-        //also have different types of groups later to spawn different swarms
-        // TODO group selector fct that selects the spawn group and spawns it with the right vals
-
-        // IN CONCLUSION 
-        // what I want is:
-        /* For each level spawn level/2 waves
-         *      for each wave spawn x groups
-         *              each group consists of z members and spawns together
-         * x is based on total hp
-         * groups are manually defined, such that they are similarly strong but feel different
-         */
-
-        while (!_dead)
-        {
-            int totalHp = 0;
-            int maxHp = 1000; // add waveHealthDIst fct here
-
-            // Spawn a group and track how much hp they had
-            //spawnGroup(5, chooseSpawnpoint(), _enemyPrefab);
-            int spawned_hp = totalHp + enemyHp;
-            Debug.Log(spawned_hp);
-
-            yield return new WaitForSeconds(_delay);
-
-        }
-
-        yield return null;
-
-    }
-
-
     IEnumerator LevelSystem()
     {
         // current level stats
@@ -213,14 +172,14 @@ public class EnemySpawner : MonoBehaviour
          * groups are manually defined, such that they are similarly strong but feel different
          */
 
-        // Make the waves
-        while (levelActive)
+        // Make the waves. add player death somehow - levelLost/levelWon are not implemented properly (and might not be a good approach)
+        while (_levelSpawnedHp < _levelTotalHp)
         {
 
             if (levelWon)
             {
                 // on level win:
-                _currentLevel += 1;
+                _currentLevel++;
                 levelActive = false;
                 Debug.Log(message: "level won");
             }
@@ -246,7 +205,9 @@ public class EnemySpawner : MonoBehaviour
                     //spawnedEnemies.Add(spawnGroup(5, chooseSpawnpoint(), _enemyPrefab)); // TODO replace this with spawnGroupSelector once implemented
                     spawnGroup(memberAmount:_groupSize, memberHp:enemyHp, spawnPoint:chooseSpawnpoint(), objectToSpawn:_enemyPrefab);
                     spawnedHp += enemyHp * _groupSize;
-                    Debug.Log("spawned hp:" );
+                    Debug.Log("spawned hp:" + spawnedHp);
+                    Debug.Log("wave" + currentWaveNr + "of " + currentLevelWaves.Length);
+
                     yield return new WaitForSeconds(_delay);
                 }
 
@@ -254,10 +215,15 @@ public class EnemySpawner : MonoBehaviour
                 // while(true){check if enemies alive} -> as soon as not, or 30s pass, levelWon = true
                 // If the wave dies -> wait, then next wave
                 // If the wave dies && it was the last wave -> levelWon
+                Debug.Log("wave over");
+                currentWaveNr++;
+                yield return new WaitForSeconds(_delay*2); // delay between waves
+                
             }
 
         }
 
+        _currentLevel++; //TODO replace with proper "levelWon" structure or something like it
         yield return null;
 
     }
