@@ -7,8 +7,6 @@ public class EnemySpawner : MonoBehaviour
 {
     public EnemyBehaviour EnemyBehaviour;
 
-    //for now, just spawn based on a delay. 
-    //later, add delay = 1/rate and an amount 
     [SerializeField]
     private GameObject _enemyPrefab;
 
@@ -36,16 +34,10 @@ public class EnemySpawner : MonoBehaviour
     private EnemyBehaviour enemyBehaviour;
 
     void Start()
-    {
-
-        // for some reason, I cannot get values from other scripts. Using a dummy value for now
-        // TODO: find out how this was done in the tutorial and where they hid the info
-        //EnemyBehaviour = GameObject.Find("Enemy1").GetComponent<EnemyBehaviour>();
-        //int enemyHp = EnemyBehaviour._hp;
-        //Debug.Log("YOYOYO" + enemyHp);
-        
+    {       
         enemyBehaviour = _enemyPrefab.GetComponent<EnemyBehaviour>();
 
+        // Todo: on player death, stop coroutine (in update function)
         StartCoroutine(LevelSystem());
     }
 
@@ -84,18 +76,13 @@ public class EnemySpawner : MonoBehaviour
 
     private void spawnGroupSelector()
     {
-        // Have another fct that decides which enemies  are "active" based on the level.
+        // Have another fct that decides which enemy types are "active" (e.g. can attack) based on the level.
         // Pass the list of active enemies (string[]) in here, choose one at random,
         // and call spawnGroup with the right parameters 
     }
 
     private void spawnGroup(int memberAmount, int memberHp, Vector2 spawnPoint, GameObject objectToSpawn)
     {
-
-        // Return spawned enemies to check if they are still alive later
-        // I don't know how much sense this makes.
-        // alright the internet basically says this is dumb
-        //List<GameObject> spawnedObjects = new List<GameObject>();
         float dist = 5f;
 
         // TODO: make random velocity, assign to each member  within the for loop
@@ -103,13 +90,11 @@ public class EnemySpawner : MonoBehaviour
         //by the distance d to the center, d such that it is out of view
         for (int i = 0; i <= memberAmount; i++)
         {
-            // using unityengine.random to clarify between this and system.random
             // Spawn at spawnpoint plus random offset
             Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
             _levelSpawnedHp += memberHp; 
         }
-        //return spawnedObjects;
     }
 
 
@@ -117,6 +102,7 @@ public class EnemySpawner : MonoBehaviour
     private Vector2 chooseSpawnpoint()
     {
         //TODO make it choose one spawnpoint at random
+        //TODO define spawn points as game corners plus random spread range plus one
 
         /*Vector2[] spawnPointArray = new Vector2[4];
 
@@ -125,7 +111,7 @@ public class EnemySpawner : MonoBehaviour
         spawnPointArray[2] = new Vector2(8, -4);
         spawnPointArray[3] = new Vector2(-8, -4);*/
 
-        return new Vector2(8, 4);
+        return new Vector2(20, 10);
     }
 
     // TODO: build functionality
@@ -144,10 +130,11 @@ public class EnemySpawner : MonoBehaviour
     }
 
 
+    // Spawns waves of enemies based on what the current level is:
     IEnumerator LevelSystem()
     {
         // current level stats
-        int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check if others are added
+        int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check once others are added
         int waveAmount = _currentLevel / 2 + 1;
         int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
         int currentWaveNr = 0;
@@ -157,7 +144,8 @@ public class EnemySpawner : MonoBehaviour
         bool levelLost = false;
         
         Debug.Log("currentLevelWaves[0] and currentLevel:");
-        Debug.Log(currentLevelWaves[0] + _currentLevel);
+        Debug.Log(currentLevelWaves[0]);
+        Debug.Log(_currentLevel);
 
 
         //also have different types of groups later to spawn different swarms
@@ -224,6 +212,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         _currentLevel++; //TODO replace with proper "levelWon" structure or something like it
+        Debug.Log(message: "level increased to " + _currentLevel);
         yield return null;
 
     }

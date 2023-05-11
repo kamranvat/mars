@@ -9,10 +9,10 @@ public class EnemyBehaviour : MonoBehaviour
     [SerializeField]
     private float _enemySpeed = 1f;
     [SerializeField]
-    private float _thrustPower = 0.1f; // power of thrust
+    private float _thrustPower = 0.02f; // power of thrust
 
     [SerializeField]
-    private float _pushApart = 0.1f; // Enemies pushing each other apart
+    private float _pushApart = 0.1f; // Enemies getting repelled when spawning on top of each other
 
     [SerializeField]
     public int _hp = 20;
@@ -21,14 +21,6 @@ public class EnemyBehaviour : MonoBehaviour
     [SerializeField]
     private Rigidbody2D RB;
 
-    //private Rigidbody2D RB;
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        //StartCoroutine(Accelerate());
-    }
 
     // Update is called once per frame
     void Update()

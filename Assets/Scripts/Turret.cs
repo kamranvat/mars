@@ -76,7 +76,6 @@ public class Turret : MonoBehaviour
             }
             else 
             {
-                Debug.Log(message: "No Enemy found");
                 yield return new WaitForSeconds(_scanDelay);
             }
 
