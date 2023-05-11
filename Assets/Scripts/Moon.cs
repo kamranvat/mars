@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Planet : MonoBehaviour
+public class Moon : MonoBehaviour
 {
-    // Script for the planet
+    // Script for Deimos and Phobos
 
     // Attachments:
     GameObject[] attachedObjects = new GameObject[3];

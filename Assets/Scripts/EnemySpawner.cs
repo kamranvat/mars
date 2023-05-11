@@ -29,7 +29,10 @@ public class EnemySpawner : MonoBehaviour
 
     [SerializeField]
     private int _currentWave = 1;
-    
+
+    [SerializeField]
+    private int[] _levelDifficulties = new int[] { 100, 200, 300, 400 };
+
     // To get hp
     private EnemyBehaviour enemyBehaviour;
 
