@@ -7,7 +7,6 @@ public class Planet : MonoBehaviour
     // Script for the planet
 
     // Attachments:
-    GameObject[] attachedObjects = new GameObject[3];
     [SerializeField]
     private GameObject[] attachedObjectTypes; // Your pool of object types to apply to the planet
     [SerializeField]
@@ -61,7 +60,7 @@ public class Planet : MonoBehaviour
     // Randomly populate with turrets (TODO change for player selection)
     void randomAttach()
     {
-        for (int i = 0; i < attachedObjects.Length; i++)
+        for (int i = 0; i < attachmentSlots.Length; i++)
         {
             // Instantiate a random selection from the 6 types to predefined locations on the wall
             int randomType = Random.Range(0, attachedObjectTypes.Length);
@@ -72,7 +71,6 @@ public class Planet : MonoBehaviour
     // Add a specified object to the planet at a specified position
     void AttachToPlanet(int position, GameObject objToPlace)
     {
-        Debug.Log("aaaaaAAAAAAAA");
-        attachedObjects[position] = Instantiate(objToPlace, attachmentSlots[position].transform);
+        attachmentSlots[position] = Instantiate(objToPlace, attachmentSlots[position].transform);
     }
 }

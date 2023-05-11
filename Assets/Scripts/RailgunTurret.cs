@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-public class Turret : MonoBehaviour
+public class RailgunTurret : MonoBehaviour
 {
 
     //vars
@@ -39,12 +39,12 @@ public class Turret : MonoBehaviour
             float distance = Vector3.Distance(enemy.transform.position, transform.position);
             if (distance < closest)
             {
-                
+
                 closest = distance;
                 closestEnemy = enemy;
             }
         }
-    return closestEnemy;
+        return closestEnemy;
     }
 
     IEnumerator Shoot()
@@ -74,7 +74,7 @@ public class Turret : MonoBehaviour
                 yield return new WaitForSeconds(_fireDelay);
 
             }
-            else 
+            else
             {
                 yield return new WaitForSeconds(_scanDelay);
             }
@@ -82,8 +82,8 @@ public class Turret : MonoBehaviour
 
         }
 
-    } 
-    
+    }
+
     IEnumerator ShootAtCursor()
     {
         float _fireDelay = 1 / _rateOfFire;
@@ -95,30 +95,6 @@ public class Turret : MonoBehaviour
             GameObject closestEnemy = GetClosestEnemy();
             if (closestEnemy != null)
             {
-
-                // Calculate the direction to the closest enemy
-                //Vector3 direction = closestEnemy.transform.position - transform.position;
-
-                // Rotate the turret towards the closest object on the z-axis
-                // TODO: convert this all to a vector2 thing and make the following line simpler
-                //Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
-                //transform.rotation = rotation;
-
-                
-
-                // Spawn the bullet in the turret for now - to avoid bad aim
-                // Note: aim is still bad. TODO find out why
-
-                /* Raimi:
-                float angle = 0;
-
-                Vector3 relative = transform.InverseTransformPoint(closestEnemy.transform.position);
-                angle = Mathf.Atan2(relative.x, relative.y) * Mathf.Rad2Deg;
-                transform.Rotate(0, 0, -angle);
-                */
-
-                /* ABerlemont:
-                 */
                 Vector3 direction = Input.mousePosition;
                 direction.z = -Camera.main.transform.position.z;
                 direction = Camera.main.ScreenToWorldPoint(direction) - transform.position;
@@ -133,7 +109,7 @@ public class Turret : MonoBehaviour
                 yield return new WaitForSeconds(_fireDelay);
 
             }
-            else 
+            else
             {
                 Debug.Log(message: "No Enemy found");
                 yield return new WaitForSeconds(_scanDelay);
