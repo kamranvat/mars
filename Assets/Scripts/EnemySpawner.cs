@@ -12,20 +12,14 @@ public class EnemySpawner : MonoBehaviour
 
     [SerializeField]
     private float _delay = 1f;
-
     [SerializeField]
     private int _groupSize = 5;
-
-    [SerializeField]
-    private bool _dead = false;
-
-    [SerializeField] // for debugging
-    public int _currentLevel = 1;
 
     [SerializeField] // for debugging, read these values out of a list later
     private int _levelTotalHp = 1000;
     [SerializeField]
     private int _levelSpawnedHp = 0;
+    private int _enemiesRemaining; // for counting how many there currently are
 
     [SerializeField]
     private int _currentWave = 1;
@@ -96,7 +90,8 @@ public class EnemySpawner : MonoBehaviour
             // Spawn at spawnpoint plus random offset
             Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
-            _levelSpawnedHp += memberHp; 
+            _levelSpawnedHp += memberHp;
+            _enemiesRemaining++;
         }
     }
 
@@ -120,16 +115,19 @@ public class EnemySpawner : MonoBehaviour
     // TODO: build functionality
     private bool isWaveAlive()
     {
-        // should only be false if the last group has been spawned and all enemies are dead
-        // handle this by making "waveOver" a public variable
-        return true;
+        // returns false if there are no living enemies on the map
+        // remember that this can be false during a level (in between waves)
+
+        bool isAlive = true;
+
     }
 
     // TODO: build functionality
-    private bool isLevelActive() 
-    { 
-        // should return true if either the player dies or the last wave of a level is dead
-        return true;
+    private bool isLevelWon() 
+    {
+        bool won = false;
+
+        if (currentWaveNr < currentLevelWaves.Length)
     }
 
 
@@ -138,17 +136,16 @@ public class EnemySpawner : MonoBehaviour
     {
         // current level stats
         int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check once others are added
-        int waveAmount = _currentLevel / 2 + 1;
+        int waveAmount = GameControl.control.currentLevel / 2 + 1;
         int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
-        int currentWaveNr = 0;
-        bool levelActive = isLevelActive();
+        int currentWaveNr = 0
 
         bool levelWon = false;
         bool levelLost = false;
         
         Debug.Log("currentLevelWaves[0] and currentLevel:");
         Debug.Log(currentLevelWaves[0]);
-        Debug.Log(_currentLevel);
+        Debug.Log(GameControl.control.currentLevel);
 
 
         //also have different types of groups later to spawn different swarms
@@ -163,22 +160,21 @@ public class EnemySpawner : MonoBehaviour
          * groups are manually defined, such that they are similarly strong but feel different
          */
 
-        // Make the waves. add player death somehow - levelLost/levelWon are not implemented properly (and might not be a good approach)
+        // Make the waves.
+        // yes I need to rework this with the game controller in mind
         while (_levelSpawnedHp < _levelTotalHp)
         {
 
             if (levelWon)
             {
                 // on level win:
-                _currentLevel++;
-                levelActive = false;
+                GameControl.control.currentLevel++;
                 Debug.Log(message: "level won");
             }
 
             if (levelLost)
             {
                 // on level loss:
-                levelActive = false;
                 Debug.Log(message: "level lost");
             } // honestly i think I should check for player death in update() and stop calling the subroutines here if it happens
 
@@ -214,8 +210,8 @@ public class EnemySpawner : MonoBehaviour
 
         }
 
-        _currentLevel++; //TODO replace with proper "levelWon" structure or something like it
-        Debug.Log(message: "level increased to " + _currentLevel);
+        GameControl.control.OnLevelWin();
+        Debug.Log(message: "level increased to " + GameControl.control.currentLevel);
         yield return null;
 
     }

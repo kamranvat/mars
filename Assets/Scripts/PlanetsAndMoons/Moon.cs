@@ -72,7 +72,7 @@ public class Moon : MonoBehaviour
     // Add a specified object to the planet at a specified position
     void AttachToPlanet(int position, GameObject objToPlace)
     {
-        Debug.Log("aaaaaAAAAAAAA");
+        Debug.Log("Attaching " + objToPlace);
         attachedObjects[position] = Instantiate(objToPlace, attachmentSlots[position].transform);
     }
 }

@@ -6,8 +6,8 @@ using static UnityEngine.GraphicsBuffer;
 public class EnemyBehaviour : MonoBehaviour
 {
     // Variables
-    [SerializeField]
-    private float _enemySpeed = 1f;
+    //[SerializeField]
+    //private float _enemySpeed = 1f; // speed to spawn at
     [SerializeField]
     private float _thrustPower = 0.02f; // power of thrust
 
@@ -16,10 +16,17 @@ public class EnemyBehaviour : MonoBehaviour
 
     [SerializeField]
     public int _hp = 20;
-    [SerializeField] // for debugging only
+
+    [SerializeField] // for debugging only, center of screen
     private Vector2 _center = Vector2.zero;
+
     [SerializeField]
     private Rigidbody2D RB;
+
+    [SerializeField]
+    private float _dmg = 10; // how much damage this enemy causes
+    [SerializeField]
+    private float _bypass = 0.1f;
 
 
     // Update is called once per frame
@@ -43,7 +50,6 @@ public class EnemyBehaviour : MonoBehaviour
             Vector2 thrust = direction * _thrustPower;
 
             // Rotate into the direction. 
-            // TODO: find a simpler way
             Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
             transform.rotation = rotation;
 
@@ -62,13 +68,12 @@ public class EnemyBehaviour : MonoBehaviour
         {
             Destroy(other.gameObject);
             Destroy(this.gameObject);
-            // Debug.Log("ded");
 
         }
 
         if (other.CompareTag("Planet"))
         {
-            //other.GetComponent<PlayerScript>().Damage();
+            GameControl.control.DamagePlayer(_dmg, _bypass);
         }
 
         // If they spawn on top of each other, push each other away so that the groups look nice
@@ -92,7 +97,7 @@ public class EnemyBehaviour : MonoBehaviour
         //float _delay = 1 / _rateOfFire;
         Vector2 target = _center;
 
-        while (true)
+        while (GameControl.control.alive)
         {
             // Aim at center of screen
             Debug.Log(message: "target aquired: " + target);
@@ -104,7 +109,7 @@ public class EnemyBehaviour : MonoBehaviour
 
 
 
-                //yield return new WaitForSeconds(_delay);
+                yield return new WaitForSeconds(1);
 
             }
 
