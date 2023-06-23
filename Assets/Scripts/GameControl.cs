@@ -5,6 +5,7 @@ using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using UnityEngine.Android;
+using UnityEngine.SceneManagement;
 
 public class GameControl : MonoBehaviour
 {
@@ -121,7 +122,7 @@ public class GameControl : MonoBehaviour
         if (playerHp < 0)
         {
             playerHp = 0;
-            PlayerDeath();
+            OnPlayerDeath();
             Debug.Log("Player death");
         }
     }
@@ -136,6 +137,7 @@ public class GameControl : MonoBehaviour
         // placeholder for now
         Debug.Log("UPGRADE MENU PLACEHOLDER ");
         // CHANGE SCENE HERE (maybe separate fct)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
     }
     public void OnLevelWin()
@@ -153,41 +155,17 @@ public class GameControl : MonoBehaviour
         // show a screen with two options
         // START LEVEL N / RETURN TO MAIN MENU
         Debug.Log("Restart Level called.");
+
+        // Reset stuff:
+        isPlayerAlive = true;
     }
 
-    public void PlayerDeath() 
+    public void OnPlayerDeath() 
         //TODO Implement
     {
         Debug.Log("Skill issue");
+        isPlayerAlive = false;
         RestartLevel();
-    }
-
-    private int[] waveHealthDistribution(int length, int level_hp)
-    {
-        // Returns an array[length] of values that sum up to level_hp, representing the total playerHp of each wave in this level.
-        // Values are taken from a linear function and normalised such that each wave is stronger than the previous
-
-        int[] distr = new int[length];
-        float step = 1f / (length - 1); // Difference between each element
-
-        float t = 0f;
-
-        Debug.Log(message: "Wave health init...");
-
-        for (int i = 0; i < length; i++)
-        {
-            float value = Mathf.Lerp(0f, level_hp, t); // interpolate value between 0 and total
-            distr[i] = Mathf.RoundToInt(value); // round to integer
-            level_hp -= distr[i]; // subtract from total
-            t += step; // increment interpolation value
-        }
-
-        // handle rounding error by adding remaining value to last element
-        distr[length - 1] += level_hp;
-
-        Debug.Log(message: "Wave health initialized. Values: " + distr);
-        return distr;
-
     }
 }
 

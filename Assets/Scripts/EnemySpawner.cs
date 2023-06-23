@@ -6,12 +6,13 @@ using UnityEngine;
 public class EnemySpawner : MonoBehaviour
 {
     public EnemyBehaviour EnemyBehaviour;
+    private IEnumerator spawner;
 
     [SerializeField]
     private GameObject _enemyPrefab;
 
     [SerializeField]
-    private float _delay = 1f;
+    private float _delay = 5f;
     [SerializeField]
     private int _groupSize = 5;
 
@@ -26,6 +27,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField]
     private int[] _levelDifficulties = new int[] { 100, 200, 300, 400 };
 
+
+
     // To get playerHp
     private EnemyBehaviour enemyBehaviour;
 
@@ -34,12 +37,16 @@ public class EnemySpawner : MonoBehaviour
         enemyBehaviour = _enemyPrefab.GetComponent<EnemyBehaviour>();
 
         // Todo: on player death, stop coroutine (in update function)
-        StartCoroutine(LevelSystem());
+        spawner = SpawnWaves();
+        StartCoroutine(spawner);
     }
 
     void Update()
     {
-
+        if (GameControl.control.isPlayerAlive == false)
+        {
+            StopSpawning();
+        }
     }
 
     private int[] waveHealthDistribution(int length, int level_hp)
@@ -121,10 +128,14 @@ public class EnemySpawner : MonoBehaviour
         return isAlive;
     }
     
-
+    public void StopSpawning()
+    {
+        StopCoroutine(spawner);
+        // TODO add "you died" message
+    }
 
     // Spawns waves of enemies based only on current level:
-    IEnumerator LevelSystem()
+    private IEnumerator SpawnWaves()
     {
         // current level stats
         int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check once others are added
@@ -154,17 +165,16 @@ public class EnemySpawner : MonoBehaviour
         {
 
             // TODO handle player death 
-            while ((currentWaveNr < currentLevelWaves.Length) || (GameControl.control.enemiesRemaining > 0))
+            while ((currentWaveNr < currentLevelWaves.Length) || (GameControl.control.enemiesRemaining > 0)) // TODO check whether this is good logic or i need to put enemiesRemaining into a separate while loop
             {
                 
-
                 // Spawn groups in regular intervals until the wave is over
                 int spawnedHp = 0; 
                 int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
-                // List<GameObject> spawnedEnemies = new List<GameObject>();
 
                 while ((spawnedHp < waveHp))
                 {
+
                     //spawnedEnemies.Add(spawnGroup(5, chooseSpawnpoint(), _enemyPrefab)); // TODO replace this with spawnGroupSelector once implemented
                     spawnGroup(memberAmount:_groupSize, memberHp:enemyHp, spawnPoint:chooseSpawnpoint(), objectToSpawn:_enemyPrefab);
                     spawnedHp += enemyHp * _groupSize;
