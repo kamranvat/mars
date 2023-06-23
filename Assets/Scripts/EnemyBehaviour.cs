@@ -67,8 +67,7 @@ public class EnemyBehaviour : MonoBehaviour
         if (other.CompareTag("Bullet"))
         {
             Destroy(other.gameObject);
-            Destroy(this.gameObject);
-
+            handleEnemyDeath();
         }
 
         if (other.CompareTag("Planet"))
@@ -90,6 +89,13 @@ public class EnemyBehaviour : MonoBehaviour
 
     }
 
+    private void handleEnemyDeath()
+    {
+        GameControl.control.enemiesRemaining--;
+        Destroy(this.gameObject);
+        Debug.Log("rip");
+    }
+
     // TODO: Enemies that shoot:
     IEnumerator Shoot() 
     {
@@ -97,7 +103,7 @@ public class EnemyBehaviour : MonoBehaviour
         //float _delay = 1 / _rateOfFire;
         Vector2 target = _center;
 
-        while (GameControl.control.alive)
+        while (GameControl.control.isPlayerAlive)
         {
             // Aim at center of screen
             Debug.Log(message: "target aquired: " + target);

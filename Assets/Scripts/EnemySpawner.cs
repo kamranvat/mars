@@ -19,7 +19,6 @@ public class EnemySpawner : MonoBehaviour
     private int _levelTotalHp = 1000;
     [SerializeField]
     private int _levelSpawnedHp = 0;
-    private int _enemiesRemaining; // for counting how many there currently are
 
     [SerializeField]
     private int _currentWave = 1;
@@ -27,7 +26,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField]
     private int[] _levelDifficulties = new int[] { 100, 200, 300, 400 };
 
-    // To get hp
+    // To get playerHp
     private EnemyBehaviour enemyBehaviour;
 
     void Start()
@@ -45,7 +44,7 @@ public class EnemySpawner : MonoBehaviour
 
     private int[] waveHealthDistribution(int length, int level_hp)
     {
-        // Returns an array[length] of values that sum up to level_hp, representing the total hp of each wave in this level.
+        // Returns an array[length] of values that sum up to level_hp, representing the total playerHp of each wave in this level.
         // Values are taken from a linear function and normalised such that each wave is stronger than the previous
 
         int[] distr = new int[length];
@@ -91,7 +90,7 @@ public class EnemySpawner : MonoBehaviour
             Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
             _levelSpawnedHp += memberHp;
-            _enemiesRemaining++;
+            GameControl.control.enemiesRemaining++;
         }
     }
 
@@ -119,29 +118,19 @@ public class EnemySpawner : MonoBehaviour
         // remember that this can be false during a level (in between waves)
 
         bool isAlive = true;
-
+        return isAlive;
     }
-
-    // TODO: build functionality
-    private bool isLevelWon() 
-    {
-        bool won = false;
-
-        if (currentWaveNr < currentLevelWaves.Length)
-    }
+    
 
 
-    // Spawns waves of enemies based on what the current level is:
+    // Spawns waves of enemies based only on current level:
     IEnumerator LevelSystem()
     {
         // current level stats
         int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check once others are added
         int waveAmount = GameControl.control.currentLevel / 2 + 1;
         int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
-        int currentWaveNr = 0
-
-        bool levelWon = false;
-        bool levelLost = false;
+        int currentWaveNr = 0;
         
         Debug.Log("currentLevelWaves[0] and currentLevel:");
         Debug.Log(currentLevelWaves[0]);
@@ -153,32 +142,19 @@ public class EnemySpawner : MonoBehaviour
 
         // IN CONCLUSION 
         // what I want is:
-        /* For each level spawn level/2 + 1 waves
+        /* For each level spawn waveAmount waves
          *      for each wave spawn x groups
          *              each group consists of z members and spawns together
-         * x is based on total hp
+         * x is based on total playerHp
          * groups are manually defined, such that they are similarly strong but feel different
          */
 
         // Make the waves.
-        // yes I need to rework this with the game controller in mind
         while (_levelSpawnedHp < _levelTotalHp)
         {
 
-            if (levelWon)
-            {
-                // on level win:
-                GameControl.control.currentLevel++;
-                Debug.Log(message: "level won");
-            }
-
-            if (levelLost)
-            {
-                // on level loss:
-                Debug.Log(message: "level lost");
-            } // honestly i think I should check for player death in update() and stop calling the subroutines here if it happens
-
-            while ((currentWaveNr < currentLevelWaves.Length) && !levelLost)
+            // TODO handle player death 
+            while ((currentWaveNr < currentLevelWaves.Length) || (GameControl.control.enemiesRemaining > 0))
             {
                 
 
@@ -187,21 +163,19 @@ public class EnemySpawner : MonoBehaviour
                 int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
                 // List<GameObject> spawnedEnemies = new List<GameObject>();
 
-                while ((spawnedHp < waveHp) && !levelLost)
+                while ((spawnedHp < waveHp))
                 {
                     //spawnedEnemies.Add(spawnGroup(5, chooseSpawnpoint(), _enemyPrefab)); // TODO replace this with spawnGroupSelector once implemented
                     spawnGroup(memberAmount:_groupSize, memberHp:enemyHp, spawnPoint:chooseSpawnpoint(), objectToSpawn:_enemyPrefab);
                     spawnedHp += enemyHp * _groupSize;
                     Debug.Log("spawned hp:" + spawnedHp);
                     Debug.Log("wave" + currentWaveNr + "of " + currentLevelWaves.Length);
+                    Debug.Log("Enemies Remaining: " + GameControl.control.enemiesRemaining);
 
-                    yield return new WaitForSeconds(_delay);
+                    yield return new WaitForSeconds(_delay); // delay between groups
                 }
 
-                // Monitor the wave - the last enemies should be on the map now
-                // while(true){check if enemies alive} -> as soon as not, or 30s pass, levelWon = true
-                // If the wave dies -> wait, then next wave
-                // If the wave dies && it was the last wave -> levelWon
+
                 Debug.Log("wave over");
                 currentWaveNr++;
                 yield return new WaitForSeconds(_delay*2); // delay between waves

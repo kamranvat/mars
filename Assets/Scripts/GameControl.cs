@@ -11,19 +11,21 @@ public class GameControl : MonoBehaviour
     // There can be only one
     public static GameControl control;
 
-    public float hp;
-    public float shield;
+    public float playerHp;
+    public float playerShield;
     public float resources;
     public int intel;
 
-    public bool alive = true;
+    public bool isPlayerAlive = true;
 
     // Level stats:
     public int currentLevel = 1;
-    public int enemyHp; //needs to be set in the spawner
-    public int waveAmount = GameControl.control.currentLevel / 2 + 1;
-    public int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
-    public int currentWaveNr = 0;
+    public int enemiesRemaining;
+
+    //public int waveAmount = currentLevel / 2 + 1;
+    //public int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
+    //public int currentWaveNr = 0;
+
 
     void Awake()
     {
@@ -42,14 +44,14 @@ public class GameControl : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.Label(new Rect(10, 10, 100, 30), "Health: " + hp);
+        GUI.Label(new Rect(10, 10, 100, 30), "Health: " + playerHp);
 
         if(GUI.Button(new Rect(10,100, 100, 30), "Save"))
         {
             GameControl.control.Save();
         }
 
-        if (GUI.Button(new Rect(10, 150, 100, 30), "´Load"))
+        if (GUI.Button(new Rect(10, 150, 100, 30), "Load"))
         {
             GameControl.control.Load();
         }
@@ -64,8 +66,8 @@ public class GameControl : MonoBehaviour
         FileStream file = File.Create(Application.persistentDataPath + "/playerInfo.dat");
 
         PlayerData data = new PlayerData();
-        data.hp = hp;
-        data.shield = shield;
+        data.hp = playerHp;
+        data.shield = playerShield;
         data.resources = resources;
         data.intel = intel;
 
@@ -82,8 +84,8 @@ public class GameControl : MonoBehaviour
             PlayerData data = (PlayerData)bf.Deserialize(file);
             file.Close();
 
-            hp = data.hp;
-            shield = data.shield;
+            playerHp = data.hp;
+            playerShield = data.shield;
             resources = data.resources; 
             intel = data.intel;
         }
@@ -91,23 +93,23 @@ public class GameControl : MonoBehaviour
 
     public float Shield(float damage, float bypass, float shieldHp)
     {
-        // Takes the damage and bypass, updates public shield hp
-        // Returns how much hp damage the player takes after shielding
+        // Takes the damage and bypass, updates public playerShield playerHp
+        // Returns how much playerHp damage the player takes after shielding
 
         float shieldBypass = damage * bypass;
         float shieldDamage = damage - shieldBypass;
         float playerDamage = shieldBypass;
-        // TODO reset shield damage timer here?
+        // TODO reset playerShield damage timer here?
 
         if (shieldDamage >= shieldHp) 
         {
-            shield = 0;
+            playerShield = 0;
             // TODO reset recharge timer
             playerDamage += shieldDamage - shieldHp;
         }
         else if (shieldDamage < shieldHp) 
         { 
-            shield = shieldHp - shieldDamage;
+            playerShield = shieldHp - shieldDamage;
         }
 
         return playerDamage;
@@ -115,10 +117,10 @@ public class GameControl : MonoBehaviour
 
     public void DamagePlayer(float damage, float bypass)
     {
-        hp -= Shield(damage, bypass, shield);
-        if (hp < 0)
+        playerHp -= Shield(damage, bypass, playerShield);
+        if (playerHp < 0)
         {
-            hp = 0;
+            playerHp = 0;
             PlayerDeath();
             Debug.Log("Player death");
         }
@@ -127,8 +129,8 @@ public class GameControl : MonoBehaviour
     public void StartLevel()
     {
         // All the things that are needed at start:
-        // reset hp
-        // reset shield
+        // reset playerHp
+        // reset playerShield
         // call upgrade menu thing maybe?
         // maybe just make that another scene
         // placeholder for now
@@ -140,6 +142,7 @@ public class GameControl : MonoBehaviour
     {
         // TODO implement "level won screen"
         // with a START LEVEL N+1 button
+        Debug.Log("On Level Win called.");
         currentLevel++;
         StartLevel();
     }
@@ -149,7 +152,7 @@ public class GameControl : MonoBehaviour
         // TODO implement as follows:
         // show a screen with two options
         // START LEVEL N / RETURN TO MAIN MENU
-        Debug.Log("Restart Level called.")
+        Debug.Log("Restart Level called.");
     }
 
     public void PlayerDeath() 
@@ -161,7 +164,7 @@ public class GameControl : MonoBehaviour
 
     private int[] waveHealthDistribution(int length, int level_hp)
     {
-        // Returns an array[length] of values that sum up to level_hp, representing the total hp of each wave in this level.
+        // Returns an array[length] of values that sum up to level_hp, representing the total playerHp of each wave in this level.
         // Values are taken from a linear function and normalised such that each wave is stronger than the previous
 
         int[] distr = new int[length];
