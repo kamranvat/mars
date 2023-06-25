@@ -12,15 +12,18 @@ public class Bullet : MonoBehaviour
 
     [SerializeField]
     private Rigidbody2D RB;
+
+    [SerializeField]
+    private float maxFireAngle = 90;
         
     private Vector2 direction;
     private Vector2 startingPosition;
 
     private void Start()
     {
-        // Store the starting position of the bullet
+        //Aim();
+        // Store starting position for MaxRange()
         startingPosition = transform.position;
-
     }
 
 
@@ -39,6 +42,45 @@ public class Bullet : MonoBehaviour
         }
     }
 
+    void Aim()
+    {
+
+        // Aim at closest Enemy
+        GameObject closestEnemy = GetClosestEnemyInArc();
+        if (closestEnemy != null)
+        {
+            // Calculate the direction to the closest enemy
+            Vector3 direction = closestEnemy.transform.position - transform.position;
+
+            // Rotate the bullet towards the closest object on the z-axis
+            Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
+            transform.rotation = rotation;
+        }
+
+    }
+
+    public GameObject GetClosestEnemyInArc()
+    {
+        float closest = _range;
+        GameObject closestEnemy = null;
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Debug.Log("get called it wants its enemy back");
+
+        // Iterate through all enemies, compare distances, return the closest one
+        foreach (GameObject enemy in allEnemies)
+        {
+            // use dot product to compare enemy direction with turret direction
+            float dot = Vector2.Dot(transform.forward, enemy.transform.position);
+            Debug.Log("dot : " + dot);
+            float distance = Vector3.Distance(enemy.transform.position, transform.position);
+            if ((distance < closest) && (dot < 0))
+            {
+                closest = distance;
+                closestEnemy = enemy;
+            }
+        }
+        return closestEnemy;
+    }
 
     // Gizmos for debugging
     void OnDrawGizmos()

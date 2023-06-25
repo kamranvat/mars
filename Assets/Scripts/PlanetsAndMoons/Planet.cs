@@ -18,8 +18,6 @@ public class Planet : MonoBehaviour
     [SerializeField]
     private float _degPerSec;
 
-    private int _lives = 5;
-
     void Start()
     {
         randomAttach();
@@ -30,31 +28,6 @@ public class Planet : MonoBehaviour
     {
         transform.RotateAround(target.transform.position, Vector3.forward, _degPerSec * Time.deltaTime);
     }
-
-
-
-    public void Damage()
-    {
-        //damage the player on enemy contact
-        _lives--;
-        Debug.Log(message: " D A M A G E " + _lives);
-
-        // update UI
-
-        // player death
-        if (_lives == 0)
-        {
-            //foreach (Transform child in SpawnManager.transform)
-            //{
-            //    Destroy(child.gameObject);
-            //}
-
-            Debug.Log(message: "ded");
-
-            //SpawnManager.GetComponent<SpawnManager>().onPlayerDeath();
-        }
-    }
-
 
 
     // Randomly populate with turrets (TODO change for player selection)

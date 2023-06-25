@@ -93,7 +93,6 @@ public class EnemyBehaviour : MonoBehaviour
     {
         GameControl.control.enemiesRemaining--;
         Destroy(this.gameObject);
-        Debug.Log("rip");
     }
 
     // TODO: Enemies that shoot:

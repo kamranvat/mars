@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -17,6 +18,8 @@ public class Turret : MonoBehaviour
     [SerializeField]
     private float _rateOfScan = 10; // if no enemy is present, how often per s should we check for enemies
 
+    [SerializeField]
+    private float _fireAngle = 180;
     void Start()
     {
         StartCoroutine(Shoot());
@@ -47,6 +50,83 @@ public class Turret : MonoBehaviour
     return closestEnemy;
     }
 
+    public GameObject GetClosestEnemyInArc()
+    {
+        float closest = _range;
+        GameObject closestEnemy = null;
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        // Iterate through all enemies, compare distances, return the closest one
+        foreach (GameObject enemy in allEnemies)
+        {  
+            // use dot product to compare enemy direction with turret direction
+            float dot = Vector2.Dot(transform.position, enemy.transform.position);
+            Debug.Log(enemy.transform.position + " " + transform.position);
+            Debug.Log(dot);
+            float distance = Vector3.Distance(enemy.transform.position, transform.position);
+            if ((distance < closest) && (dot > 0)) 
+            {
+                closest = distance;
+                closestEnemy = enemy;
+            }
+        }
+        return closestEnemy;
+    }
+
+    private GameObject GetClosestEnemyInArcd(float maxFireAngle)
+    {
+        float closestDistance = Mathf.Infinity;
+        GameObject closestEnemy = null;
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        // Iterate through all enemies within the arc, compare distances, return the closest one
+        foreach (GameObject enemy in allEnemies)
+        {
+            // use direction from turret local space
+            Vector3 direction = transform.InverseTransformPoint(enemy.transform.position);
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            if (Mathf.Abs(angle) <= maxFireAngle * 0.5f)
+            {
+                float distance = Vector3.Distance(enemy.transform.position, transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = enemy;
+                }
+            }
+        }
+        return closestEnemy;
+    }
+
+    IEnumerator Fire()
+    {
+        float _fireDelay = 1 / _rateOfFire;
+        float _scanDelay = 1 / _rateOfScan;
+
+        while (true)
+        {
+            // Check for enemy TODO remove
+            GameObject closestEnemy = GetClosestEnemyInArc();
+            if (closestEnemy != null)
+            {
+                // Spawn bullet above turret
+                Vector3 spawnPos = transform.position + transform.forward.normalized;
+                Instantiate(_bulletPrefab, spawnPos, transform.rotation);
+
+                yield return new WaitForSeconds(_fireDelay);
+
+            }
+            else
+            {
+                yield return new WaitForSeconds(_scanDelay);
+            }
+
+
+        }
+
+    }
+
     IEnumerator Shoot()
     {
         float _fireDelay = 1 / _rateOfFire;
@@ -55,7 +135,7 @@ public class Turret : MonoBehaviour
         while (true)
         {
             // Aim at closest Enemy
-            GameObject closestEnemy = GetClosestEnemy();
+            GameObject closestEnemy = GetClosestEnemyInArc();
             if (closestEnemy != null)
             {
 
@@ -63,7 +143,6 @@ public class Turret : MonoBehaviour
                 Vector3 direction = closestEnemy.transform.position - transform.position;
 
                 // Rotate the turret towards the closest object on the z-axis
-                // TODO: convert this all to a vector2 thing and make the following line simpler
                 Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
                 transform.rotation = rotation;
 
@@ -83,6 +162,7 @@ public class Turret : MonoBehaviour
         }
 
     } 
+
     
     IEnumerator ShootAtCursor()
     {
@@ -95,27 +175,6 @@ public class Turret : MonoBehaviour
             GameObject closestEnemy = GetClosestEnemy();
             if (closestEnemy != null)
             {
-
-                // Calculate the direction to the closest enemy
-                //Vector3 direction = closestEnemy.transform.position - transform.position;
-
-                // Rotate the turret towards the closest object on the z-axis
-                // TODO: convert this all to a vector2 thing and make the following line simpler
-                //Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
-                //transform.rotation = rotation;
-
-                
-
-                // Spawn the bullet in the turret for now - to avoid bad aim
-                // Note: aim is still bad. TODO find out why
-
-                /* Raimi:
-                float angle = 0;
-
-                Vector3 relative = transform.InverseTransformPoint(closestEnemy.transform.position);
-                angle = Mathf.Atan2(relative.x, relative.y) * Mathf.Rad2Deg;
-                transform.Rotate(0, 0, -angle);
-                */
 
                 /* ABerlemont:
                  */

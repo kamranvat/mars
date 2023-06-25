@@ -123,7 +123,6 @@ public class GameControl : MonoBehaviour
         {
             playerHp = 0;
             OnPlayerDeath();
-            Debug.Log("Player death");
         }
     }
 
