@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class Explosion : MonoBehaviour
 {
-
+    [SerializeField]
     private float _duration = 1f;
-    public float damage;
+    [SerializeField]
+    private float _damage;
 
     void Start()
     {
@@ -16,6 +17,11 @@ public class Explosion : MonoBehaviour
     private void DestroyExplosion()
     {
         Destroy(gameObject);
+    }
+
+    public float GetDamage()
+    {
+        return _damage;
     }
 
 }

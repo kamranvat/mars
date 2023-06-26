@@ -96,9 +96,6 @@ public class Missile : MonoBehaviour
 
         }
 
-
-
-
     }
 
     private void Movement()
@@ -109,11 +106,6 @@ public class Missile : MonoBehaviour
             //transform.position += transform.up * Time.deltaTime * _missileSpeed;
             RB.AddForce(transform.up * _thrustPower);
         }
-
-
-
-        //Debug.Log("found");
-        //Destroy(gameObject);
 
         // add top speed maybe
 

@@ -13,7 +13,7 @@ public class GameControl : MonoBehaviour
     public static GameControl control;
 
     public float playerHp;
-    public float playerShield;
+    public float shieldHp;
     public float resources;
     public int intel;
 
@@ -92,33 +92,52 @@ public class GameControl : MonoBehaviour
         }
     }
 
-    public float Shield(float damage, float bypass, float shieldHp)
+    public float Shield(float damage, float bypass, bool emp)
     {
-        // Takes the damage and bypass, updates public playerShield playerHp
+        // Takes the damage and bypass, updates public playerShield
         // Returns how much playerHp damage the player takes after shielding
 
-        float shieldBypass = damage * bypass;
-        float shieldDamage = damage - shieldBypass;
-        float playerDamage = shieldBypass;
+        float bypassAmount = damage * bypass;
+        float shieldDamage = damage - bypassAmount;
+        float playerDamage = bypassAmount;
         // TODO reset playerShield damage timer here?
 
-        if (shieldDamage >= shieldHp) 
-        {
-            playerShield = 0;
-            // TODO reset recharge timer
-            playerDamage += shieldDamage - shieldHp;
-        }
-        else if (shieldDamage < shieldHp) 
-        { 
-            playerShield = shieldHp - shieldDamage;
-        }
 
-        return playerDamage;
+
+        if (emp)
+        {
+            // EMP only damages shields
+            shieldHp -= damage;
+
+            if (shieldHp <= 0)
+            {
+                shieldHp = 0;
+            }
+
+            return 0;
+
+        }
+        else
+        {
+            if (shieldDamage >= shieldHp)
+            {
+                shieldHp = 0;
+                // TODO reset recharge timer
+                playerDamage += shieldDamage - shieldHp;
+            }
+            else if (shieldDamage < shieldHp)
+            {
+                shieldHp = shieldHp - shieldDamage;
+            }
+
+            return playerDamage;
+        }
+        
     }
 
-    public void DamagePlayer(float damage, float bypass)
+    public void DamagePlayer(float damage, float bypass, bool emp)
     {
-        playerHp -= Shield(damage, bypass, playerShield);
+        playerHp -= Shield(damage, bypass, emp);
         if (playerHp < 0)
         {
             playerHp = 0;

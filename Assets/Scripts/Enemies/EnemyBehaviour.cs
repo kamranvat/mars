@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
@@ -15,8 +16,13 @@ public class EnemyBehaviour : MonoBehaviour
     [SerializeField]
     private float _pushApart = 0.1f; // Enemies getting repelled when spawning on top of each other
 
+    // Enemy stats:
     [SerializeField]
-    public int _hp = 20;
+    private float _shieldHp = 10;
+    [SerializeField]
+    public float maxHp = 20;
+    private float _hp;
+    private int _resources;
 
     [SerializeField] // for debugging only, center of screen
     private Vector2 _center = Vector2.zero;
@@ -30,17 +36,21 @@ public class EnemyBehaviour : MonoBehaviour
     private float _bypass = 0.1f;
 
 
-    // Update is called once per frame
+
+    private void Start()
+    {
+        _hp = maxHp;
+        _resources = Mathf.FloorToInt(maxHp / 10);
+    }
+
+
     void Update()
     {
-        Movement();
-        
+        Movement();      
     }
 
     void Movement()
     {
-        // TODO: Convert gameobj transform into target vector 
-        // (allows me to set arbitrary things as target)
         Vector2 target = _center;
 
         if (target != null)
@@ -56,19 +66,16 @@ public class EnemyBehaviour : MonoBehaviour
 
             // Accelerate toward the target
             RB.AddForce(thrust);
-
-
         }
     }
     
     // Collision with bullets and planets
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Test collisions
         if (other.CompareTag("Bullet"))
         {
             Destroy(other.gameObject);
-            handleEnemyDeath();
+            HandleEnemyDeath();
         }
 
         if (other.CompareTag("Fuse"))
@@ -78,7 +85,12 @@ public class EnemyBehaviour : MonoBehaviour
 
         if (other.CompareTag("Explosion"))
         {
-            Destroy(this.gameObject);
+            Explosion explosion = other.GetComponent<Explosion>();
+            if (explosion != null)
+            {
+                float damage = explosion.GetDamage();
+                Destroy(this.gameObject);
+            } 
         }
 
         if (other.CompareTag("Planet"))
@@ -101,10 +113,63 @@ public class EnemyBehaviour : MonoBehaviour
 
     }
 
-    private void handleEnemyDeath()
+    public float EnemyShield(float damage, float bypass, bool emp)
+    {
+        // Calculate the amount of damage to bypass the shield
+        float bypassAmount = damage * bypass;
+
+        // Calculate the amount of damage to take by the shield
+        float shieldDamage = damage - bypassAmount;
+
+        float enemyDamage = bypassAmount;
+
+        // Apply EMP effect if enabled
+        if (emp)
+        {
+            // Take all the damage by the shield
+            _shieldHp -= damage;
+
+            if (_shieldHp <= 0)
+            {
+                _shieldHp = 0;
+            }
+
+            return 0;
+
+        }
+        else
+        {
+            if (shieldDamage >= _shieldHp)
+            {
+                _shieldHp = 0;
+                // TODO reset recharge timer
+                enemyDamage += shieldDamage - _shieldHp;
+            }
+            else if (shieldDamage < _shieldHp)
+            {
+                _shieldHp = _shieldHp - shieldDamage;
+            }
+
+            return enemyDamage;
+        }
+
+
+    }
+
+    public void DamageEnemy(float damage, float bypass, bool emp)
+    {
+        _hp -= EnemyShield(damage, bypass, emp);
+
+        if (_hp <= 0)
+        {
+            HandleEnemyDeath();
+        }
+    }
+
+    private void HandleEnemyDeath()
     {
         GameControl.control.enemiesRemaining--;
-        Destroy(this.gameObject);
+        Destroy(gameObject);
     }
 
     // TODO: Enemies that shoot:
@@ -132,9 +197,4 @@ public class EnemyBehaviour : MonoBehaviour
 
         }
     }
-
-    // TODO: Enemy health system
-
-    // TODO: Enemy death 
-
 }
