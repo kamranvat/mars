@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1569938309646858855}
   - component: {fileID: 8550754671697866631}
   - component: {fileID: 4574328172126463247}
+  - component: {fileID: -414223531349588411}
   m_Layer: 0
   m_Name: ResourceDummy
   m_TagString: Untagged
@@ -100,9 +101,22 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-414223531349588411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1011944497380433724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bef1c7f64d8461141a07c15556b8de23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gravityStrength: 10

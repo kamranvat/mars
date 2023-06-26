@@ -47,8 +47,7 @@ public class EnemyBehaviour : MonoBehaviour
         _resourceAmount = Mathf.FloorToInt(maxHp / 10);
     }
 
-
-    void Update()
+    private void FixedUpdate()
     {
         Movement();      
     }

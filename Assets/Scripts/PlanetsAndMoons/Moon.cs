@@ -27,7 +27,7 @@ public class Moon : MonoBehaviour
 
     }
 
-    void Update()
+    private void FixedUpdate()
     {
         transform.RotateAround(target.transform.position, Vector3.forward, _degPerSec * Time.deltaTime);
     }
