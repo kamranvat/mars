@@ -1,13 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Explosion : MonoBehaviour
 {
     [SerializeField]
     private float _duration = 1f;
     [SerializeField]
-    private float _damage;
+    private float _damage = 10;
+    [SerializeField]
+    private float _bypass = 0f;
+    [SerializeField]
+    private bool _emp = false;
 
     void Start()
     {
@@ -19,9 +24,8 @@ public class Explosion : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public float GetDamage()
+    public Tuple<float, float, bool> GetDamageStats()
     {
-        return _damage;
+        return Tuple.Create(_damage, _bypass, _emp);
     }
-
 }

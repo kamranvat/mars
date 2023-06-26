@@ -19,7 +19,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] // for debugging, read these values out of a list later
     private int _levelTotalHp = 1000;
     [SerializeField]
-    private int _levelSpawnedHp = 0;
+    private float _levelSpawnedHp = 0;
 
     [SerializeField]
     private int _currentWave = 1;
@@ -84,7 +84,7 @@ public class EnemySpawner : MonoBehaviour
         // and call spawnGroup with the right parameters 
     }
 
-    private void spawnGroup(int memberAmount, int memberHp, Vector2 spawnPoint, GameObject objectToSpawn)
+    private void spawnGroup(int memberAmount, float memberHp, Vector2 spawnPoint, GameObject objectToSpawn)
     {
         float dist = 5f;
 
@@ -138,7 +138,7 @@ public class EnemySpawner : MonoBehaviour
     private IEnumerator SpawnWaves()
     {
         // current level stats
-        int enemyHp = enemyBehaviour._hp; //should be fine up here for one enemy type - check once others are added
+        float enemyHp = enemyBehaviour.maxHp; //should be fine up here for one enemy type - check once others are added
         int waveAmount = GameControl.control.currentLevel / 2 + 1;
         int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
         int currentWaveNr = 0;
@@ -169,7 +169,7 @@ public class EnemySpawner : MonoBehaviour
             {
                 
                 // Spawn groups in regular intervals until the wave is over
-                int spawnedHp = 0; 
+                float spawnedHp = 0; 
                 int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
 
                 while ((spawnedHp < waveHp))

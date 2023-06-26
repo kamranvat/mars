@@ -1,46 +1,50 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
+using Random = UnityEngine.Random;
 
 public class EnemyBehaviour : MonoBehaviour
 {
-    // Variables
-    //[SerializeField]
-    //private float _enemySpeed = 1f; // speed to spawn at
+    // Movement:
     [SerializeField]
     private float _thrustPower = 0.02f; // power of thrust
-
     [SerializeField]
     private float _pushApart = 0.1f; // Enemies getting repelled when spawning on top of each other
+    [SerializeField] // for debugging only, center of screen
+    private Vector2 _center = Vector2.zero;
+    [SerializeField]
+    private Rigidbody2D RB;
 
-    // Enemy stats:
+    // Health:
     [SerializeField]
     private float _shieldHp = 10;
     [SerializeField]
     public float maxHp = 20;
     private float _hp;
-    private int _resources;
+    
 
-    [SerializeField] // for debugging only, center of screen
-    private Vector2 _center = Vector2.zero;
-
+    // Damage:
     [SerializeField]
-    private Rigidbody2D RB;
-
-    [SerializeField]
-    private float _dmg = 10; // how much damage this enemy causes
+    private float _damage = 10; 
     [SerializeField]
     private float _bypass = 0.1f;
+    [SerializeField]
+    private bool _emp = false;
 
+    // Drops:
+    [SerializeField]
+    private GameObject Resource;
+    private int _resourceAmount;
 
 
     private void Start()
     {
         _hp = maxHp;
-        _resources = Mathf.FloorToInt(maxHp / 10);
+        _resourceAmount = Mathf.FloorToInt(maxHp / 10);
     }
 
 
@@ -88,15 +92,14 @@ public class EnemyBehaviour : MonoBehaviour
             Explosion explosion = other.GetComponent<Explosion>();
             if (explosion != null)
             {
-                float damage = explosion.GetDamage();
-                Destroy(this.gameObject);
+                DamageEnemy(explosion.GetDamageStats());
             } 
         }
 
         if (other.CompareTag("Planet"))
         {
-            GameControl.control.DamagePlayer(_dmg, _bypass);
-            Destroy(this.gameObject);
+            GameControl.control.DamagePlayer(Tuple.Create(_damage, _bypass, _emp));
+            Destroy(gameObject);
         }
 
         // If they spawn on top of each other, push each other away so that the groups look nice
@@ -113,20 +116,22 @@ public class EnemyBehaviour : MonoBehaviour
 
     }
 
-    public float EnemyShield(float damage, float bypass, bool emp)
+    public float EnemyShield(Tuple<float, float, bool> damageTuple)
     {
-        // Calculate the amount of damage to bypass the shield
+
+        float damage = damageTuple.Item1;
+        float bypass = damageTuple.Item2;
+        bool emp = damageTuple.Item3;
+        // Takes damage and bypass, updates enemies _shieldHp
+        // Returns how much hp the enemy loses after shielding
+
         float bypassAmount = damage * bypass;
-
-        // Calculate the amount of damage to take by the shield
         float shieldDamage = damage - bypassAmount;
-
         float enemyDamage = bypassAmount;
 
-        // Apply EMP effect if enabled
         if (emp)
         {
-            // Take all the damage by the shield
+            // EMP only damages shields
             _shieldHp -= damage;
 
             if (_shieldHp <= 0)
@@ -156,9 +161,9 @@ public class EnemyBehaviour : MonoBehaviour
 
     }
 
-    public void DamageEnemy(float damage, float bypass, bool emp)
+    public void DamageEnemy(Tuple<float, float, bool> damageTuple)
     {
-        _hp -= EnemyShield(damage, bypass, emp);
+        _hp -= EnemyShield(damageTuple);
 
         if (_hp <= 0)
         {
@@ -169,7 +174,30 @@ public class EnemyBehaviour : MonoBehaviour
     private void HandleEnemyDeath()
     {
         GameControl.control.enemiesRemaining--;
+        DropResources();
         Destroy(gameObject);
+    }
+
+    private void DropResources()
+    {
+        for (int i = 0; i < _resourceAmount; i++)
+        {
+            DropObject(Resource);
+        }
+    }
+
+    void DropObject(GameObject prefab)
+    {
+        GameObject newObject = Instantiate(prefab, transform.position, transform.rotation);
+        Rigidbody2D rigidbody2D = newObject.GetComponent<Rigidbody2D>();
+
+        // Apply random velocity
+        Vector2 randomVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+        rigidbody2D.velocity = randomVelocity;
+
+        // Apply random rotation
+        float randomRotation = Random.Range(0f, 360f);
+        rigidbody2D.angularVelocity = randomRotation;
     }
 
     // TODO: Enemies that shoot:

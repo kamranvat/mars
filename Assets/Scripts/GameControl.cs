@@ -12,7 +12,9 @@ public class GameControl : MonoBehaviour
     // There can be only one
     public static GameControl control;
 
+    public float maxPlayerHp;
     public float playerHp;
+    public float maxShielpHp;
     public float shieldHp;
     public float resources;
     public int intel;
@@ -68,7 +70,7 @@ public class GameControl : MonoBehaviour
 
         PlayerData data = new PlayerData();
         data.hp = playerHp;
-        data.shield = playerShield;
+        data.shield = shieldHp;
         data.resources = resources;
         data.intel = intel;
 
@@ -86,23 +88,26 @@ public class GameControl : MonoBehaviour
             file.Close();
 
             playerHp = data.hp;
-            playerShield = data.shield;
+            shieldHp = data.shield;
             resources = data.resources; 
             intel = data.intel;
         }
     }
 
-    public float Shield(float damage, float bypass, bool emp)
+    public float Shield(Tuple<float, float, bool> damageTuple)
     {
+
+        float damage = damageTuple.Item1;
+        float bypass = damageTuple.Item2;
+        bool emp = damageTuple.Item3;
+
         // Takes the damage and bypass, updates public playerShield
         // Returns how much playerHp damage the player takes after shielding
-
         float bypassAmount = damage * bypass;
         float shieldDamage = damage - bypassAmount;
         float playerDamage = bypassAmount;
+
         // TODO reset playerShield damage timer here?
-
-
 
         if (emp)
         {
@@ -135,9 +140,9 @@ public class GameControl : MonoBehaviour
         
     }
 
-    public void DamagePlayer(float damage, float bypass, bool emp)
+    public void DamagePlayer(Tuple<float,float,bool> statsTuple)
     {
-        playerHp -= Shield(damage, bypass, emp);
+        playerHp -= Shield(statsTuple);
         if (playerHp < 0)
         {
             playerHp = 0;
@@ -156,6 +161,9 @@ public class GameControl : MonoBehaviour
         Debug.Log("UPGRADE MENU PLACEHOLDER ");
         // CHANGE SCENE HERE (maybe separate fct)
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        playerHp = maxPlayerHp;
+        shieldHp = maxShielpHp;
 
     }
     public void OnLevelWin()
