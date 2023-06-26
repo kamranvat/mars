@@ -8,13 +8,13 @@ public class Planet : MonoBehaviour
 
     // Attachments:
     [SerializeField]
-    private GameObject[] attachedObjectTypes; // Your pool of object types to apply to the planet
+    private GameObject[] attachedObjectTypes; // Pool of object types to attach to the planet
     [SerializeField]
     private GameObject[] attachmentSlots;
 
     // Rotation:
     [SerializeField]
-    private GameObject target;
+    private GameObject target; // Point to rotate around
     [SerializeField]
     private float _degPerSec;
 

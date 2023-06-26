@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -70,9 +71,20 @@ public class EnemyBehaviour : MonoBehaviour
             handleEnemyDeath();
         }
 
+        if (other.CompareTag("Fuse"))
+        {
+            Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag("Explosion"))
+        {
+            Destroy(this.gameObject);
+        }
+
         if (other.CompareTag("Planet"))
         {
             GameControl.control.DamagePlayer(_dmg, _bypass);
+            Destroy(this.gameObject);
         }
 
         // If they spawn on top of each other, push each other away so that the groups look nice

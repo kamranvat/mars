@@ -61,8 +61,6 @@ public class Turret : MonoBehaviour
         {  
             // use dot product to compare enemy direction with turret direction
             float dot = Vector2.Dot(transform.position, enemy.transform.position);
-            Debug.Log(enemy.transform.position + " " + transform.position);
-            Debug.Log(dot);
             float distance = Vector3.Distance(enemy.transform.position, transform.position);
             if ((distance < closest) && (dot > 0)) 
             {

@@ -153,7 +153,7 @@ public class GameControl : MonoBehaviour
         // TODO implement as follows:
         // show a screen with two options
         // START LEVEL N / RETURN TO MAIN MENU
-        Debug.Log("Restart Level called.");
+        // Note: this gets called a bunch of times
 
         // Reset stuff:
         isPlayerAlive = true;
@@ -162,7 +162,7 @@ public class GameControl : MonoBehaviour
     public void OnPlayerDeath() 
         //TODO Implement
     {
-        Debug.Log("Skill issue");
+        //Debug.Log("Skill issue");
         isPlayerAlive = false;
         RestartLevel();
     }
