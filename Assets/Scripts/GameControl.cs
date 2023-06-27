@@ -247,6 +247,7 @@ public class GameControl : MonoBehaviour
                 break;
             case LevelPhase.Outro:
                 // Start the outro phase
+                // set resourcegravity to high
                 break;
         }
     }
@@ -264,6 +265,7 @@ public class GameControl : MonoBehaviour
                 break;
             case LevelPhase.Outro:
                 // Show level won screen
+                // set resourcegravity back to normal, destroy all remaining resources
                 break;
         }
     }
@@ -288,6 +290,7 @@ public class GameControl : MonoBehaviour
                 break;
         }
     }
+
     public void CollectResource()
     {
         StartCoroutine(IncrementResourceWithDelay(10));
