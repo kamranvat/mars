@@ -194,7 +194,7 @@ public class EnemySpawner : MonoBehaviour
 
         }
 
-        GameControl.control.OnLevelWin();
+        GameControl.control.OnFightWin();
         Debug.Log(message: "level increased to " + GameControl.control.currentLevel);
         yield return null;
 

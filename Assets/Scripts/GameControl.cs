@@ -29,9 +29,6 @@ public class GameControl : MonoBehaviour
     public float resources;
     public int intel;
 
-    // Level info
-    public int currentLevel = 1;
-    public int enemiesRemaining;
 
     // Each level has three phases
     public enum LevelPhase
@@ -40,6 +37,12 @@ public class GameControl : MonoBehaviour
         Fight,
         Outro
     }
+
+    // Level info
+    public int currentLevel = 1;
+    public int enemiesRemaining;
+    private LevelPhase currentLevelPhase;
+    //private bool isPhaseDone = false;
 
     // Functional
     public bool isPlayerAlive = true;
@@ -62,7 +65,6 @@ public class GameControl : MonoBehaviour
         zoomController = FindObjectOfType<CameraZoomController>();
     }
 
-
     private void Update()
     {
         // Shield recharge:
@@ -70,7 +72,7 @@ public class GameControl : MonoBehaviour
         {
             shieldRechargeTimer -= Time.deltaTime;
         }
-        else if (!IsShieldFullyCharged())
+        else if (!IsShieldFullyCharged() && isPlayerAlive)
         {
             ChargeShield();
         }
@@ -198,7 +200,11 @@ public class GameControl : MonoBehaviour
 
     public void DamagePlayer(Tuple<float,float,bool> statsTuple)
     {
-        playerHp -= Shield(statsTuple);
+        if (isPlayerAlive) 
+        {
+            playerHp -= Shield(statsTuple);
+        }
+           
         if (playerHp < 0)
         {
             playerHp = 0;
@@ -211,19 +217,77 @@ public class GameControl : MonoBehaviour
         // All the things that are needed at start:
         // reset playerHp
         // reset playerShield
+        
+        // CHANGE SCENE HERE (maybe separate fct)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         // call upgrade menu thing maybe?
         // maybe just make that another scene
         // placeholder for now
+        currentLevelPhase = LevelPhase.Upgrade;
         Debug.Log("UPGRADE MENU PLACEHOLDER ");
-        // CHANGE SCENE HERE (maybe separate fct)
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
         playerHp = maxPlayerHp;
         shieldHp = maxShielpHp;
         shieldRechargeTimer = shieldRechargeDelay;
 
+        StartPhase(currentLevelPhase);
+
     }
 
+    private void StartPhase(LevelPhase phase)
+    {
+        // Perform actions specific to the given phase
+        switch (phase)
+        {
+            case LevelPhase.Upgrade:
+                zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
+                break;
+            case LevelPhase.Fight:
+                // Start the fight phase
+                break;
+            case LevelPhase.Outro:
+                // Start the outro phase
+                break;
+        }
+    }
+
+    private void EndPhase(LevelPhase phase)
+    {
+        // Perform actions specific to the given phase at its end
+        switch (phase)
+        {
+            case LevelPhase.Upgrade:
+                zoomController.ZoomOut();
+                break;
+            case LevelPhase.Fight:
+                // Fade out fight HUD
+                break;
+            case LevelPhase.Outro:
+                // Show level won screen
+                break;
+        }
+    }
+
+    private void AdvanceToNextPhase()
+    {
+        // End the current phase
+        EndPhase(currentLevelPhase);
+
+        // Determine the next phase
+        switch (currentLevelPhase)
+        {
+            case LevelPhase.Upgrade:
+                currentLevelPhase = LevelPhase.Fight;
+                break;
+            case LevelPhase.Fight:
+                currentLevelPhase = LevelPhase.Outro;
+                break;
+            case LevelPhase.Outro:
+                Debug.Log("Level " + currentLevel + " done.");
+                currentLevel++;
+                break;
+        }
+    }
     public void CollectResource()
     {
         StartCoroutine(IncrementResourceWithDelay(10));
@@ -244,13 +308,13 @@ public class GameControl : MonoBehaviour
     {
         intel++;
     }
-    public void OnLevelWin()
+
+    public void OnFightWin()
     {
         // TODO implement "level won screen"
         // with a START LEVEL N+1 button
         Debug.Log("On Level Win called.");
-        currentLevel++;
-        StartLevel();
+        AdvanceToNextPhase();
     }
 
     public void RestartLevel()
@@ -259,13 +323,13 @@ public class GameControl : MonoBehaviour
         // show a screen with two options
         // START LEVEL N / RETURN TO MAIN MENU
         // Note: this gets called a bunch of times
-
+        Debug.Log("Restarting");
         // Reset stuff:
         isPlayerAlive = true;
+        StartLevel();
     }
 
     public void OnPlayerDeath() 
-        //TODO Implement
     {
         //Debug.Log("Skill issue");
         isPlayerAlive = false;
