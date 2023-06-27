@@ -16,6 +16,8 @@ public class GameControl : MonoBehaviour
     public float playerHp;
     public float maxShielpHp;
     public float shieldHp;
+    public float shieldRechargeDelay;
+    public float shieldRechargeRate;
     public float resources;
     public int intel;
 
@@ -25,9 +27,7 @@ public class GameControl : MonoBehaviour
     public int currentLevel = 1;
     public int enemiesRemaining;
 
-    //public int waveAmount = currentLevel / 2 + 1;
-    //public int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
-    //public int currentWaveNr = 0;
+    private float shieldRechargeTimer;
 
 
     void Awake()
@@ -42,7 +42,24 @@ public class GameControl : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        
+
+    }
+
+    private void Start()
+    {
+        shieldRechargeTimer = shieldRechargeDelay;
+    }
+
+    private void Update()
+    {
+        if (shieldRechargeTimer > 0f)
+        {
+            shieldRechargeTimer -= Time.deltaTime;
+        }
+        else if (!IsShieldFullyCharged())
+        {
+            ChargeShield();
+        }
     }
 
     void OnGUI()
@@ -138,6 +155,19 @@ public class GameControl : MonoBehaviour
             return playerDamage;
         }
         
+    }
+
+    public void ChargeShield()
+    {
+        shieldHp += shieldRechargeRate * Time.deltaTime;
+
+        // Clamp shieldHp to maximum value
+        shieldHp = Mathf.Clamp(shieldHp, 0f, maxShielpHp);
+    }
+
+    public bool IsShieldFullyCharged()
+    {
+        return shieldHp >= maxShielpHp;
     }
 
     public void DamagePlayer(Tuple<float,float,bool> statsTuple)
