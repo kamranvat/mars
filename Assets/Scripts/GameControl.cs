@@ -12,21 +12,37 @@ public class GameControl : MonoBehaviour
     // There can be only one
     public static GameControl control;
 
+    // Camera zoom for upgrade phase
+    public CameraZoomController zoomController;
+    private Vector2 _upgradeZoomPosition = new Vector2(5f, 0f);
+    private float _upgradeZoomLevel = 5f;
+
+    // Player stats
     public float maxPlayerHp;
     public float playerHp;
     public float maxShielpHp;
     public float shieldHp;
     public float shieldRechargeDelay;
     public float shieldRechargeRate;
+
+    // Inventory
     public float resources;
     public int intel;
 
-    public bool isPlayerAlive = true;
-
-    // Level stats:
+    // Level info
     public int currentLevel = 1;
     public int enemiesRemaining;
 
+    // Each level has three phases
+    public enum LevelPhase
+    {
+        Upgrade,
+        Fight,
+        Outro
+    }
+
+    // Functional
+    public bool isPlayerAlive = true;
     private float shieldRechargeTimer;
 
 
@@ -43,11 +59,13 @@ public class GameControl : MonoBehaviour
             Destroy(gameObject);
         }
 
+        zoomController = FindObjectOfType<CameraZoomController>();
     }
 
 
     private void Update()
     {
+        // Shield recharge:
         if (shieldRechargeTimer > 0f)
         {
             shieldRechargeTimer -= Time.deltaTime;
@@ -55,6 +73,17 @@ public class GameControl : MonoBehaviour
         else if (!IsShieldFullyCharged())
         {
             ChargeShield();
+        }
+
+        // Camera zoom:
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            zoomController.ZoomOut();
         }
     }
 
