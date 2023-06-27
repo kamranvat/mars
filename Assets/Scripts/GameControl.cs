@@ -45,10 +45,6 @@ public class GameControl : MonoBehaviour
 
     }
 
-    private void Start()
-    {
-        shieldRechargeTimer = shieldRechargeDelay;
-    }
 
     private void Update()
     {
@@ -124,7 +120,8 @@ public class GameControl : MonoBehaviour
         float shieldDamage = damage - bypassAmount;
         float playerDamage = bypassAmount;
 
-        // TODO reset playerShield damage timer here?
+        // Taking damage resets the timer
+        shieldRechargeTimer = shieldRechargeDelay;
 
         if (emp)
         {
@@ -194,6 +191,7 @@ public class GameControl : MonoBehaviour
 
         playerHp = maxPlayerHp;
         shieldHp = maxShielpHp;
+        shieldRechargeTimer = shieldRechargeDelay;
 
     }
 
