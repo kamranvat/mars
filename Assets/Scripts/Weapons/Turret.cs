@@ -71,31 +71,6 @@ public class Turret : MonoBehaviour
         return closestEnemy;
     }
 
-    private GameObject GetClosestEnemyInArcd(float maxFireAngle)
-    {
-        float closestDistance = Mathf.Infinity;
-        GameObject closestEnemy = null;
-        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        // Iterate through all enemies within the arc, compare distances, return the closest one
-        foreach (GameObject enemy in allEnemies)
-        {
-            // use direction from turret local space
-            Vector3 direction = transform.InverseTransformPoint(enemy.transform.position);
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-            if (Mathf.Abs(angle) <= maxFireAngle * 0.5f)
-            {
-                float distance = Vector3.Distance(enemy.transform.position, transform.position);
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    closestEnemy = enemy;
-                }
-            }
-        }
-        return closestEnemy;
-    }
 
     IEnumerator Fire()
     {
@@ -169,33 +144,18 @@ public class Turret : MonoBehaviour
 
         while (true)
         {
-            // Aim at closest Enemy
-            GameObject closestEnemy = GetClosestEnemy();
-            if (closestEnemy != null)
-            {
+            Vector3 direction = Input.mousePosition;
+            direction.z = -Camera.main.transform.position.z;
+            direction = Camera.main.ScreenToWorldPoint(direction) - transform.position;
+            transform.rotation = Quaternion.LookRotation(transform.forward, direction);
 
-                /* ABerlemont:
-                 */
-                Vector3 direction = Input.mousePosition;
-                direction.z = -Camera.main.transform.position.z;
-                direction = Camera.main.ScreenToWorldPoint(direction) - transform.position;
-                transform.rotation = Quaternion.LookRotation(transform.forward, direction);
+            // Spawn the bullet slightly above the turret
+            //Vector3 spawnPos = transform.position + direction.normalized * 2f;
 
-                // Spawn the bullet slightly above the turret
-                //Vector3 spawnPos = transform.position + direction.normalized * 2f;
+            Vector3 spawnPos = transform.position + transform.forward.normalized;
+            Instantiate(_bulletPrefab, spawnPos, transform.rotation);
 
-                Vector3 spawnPos = transform.position + transform.forward.normalized;
-                Instantiate(_bulletPrefab, spawnPos, transform.rotation);
-
-                yield return new WaitForSeconds(_fireDelay);
-
-            }
-            else 
-            {
-                Debug.Log(message: "No Enemy found");
-                yield return new WaitForSeconds(_scanDelay);
-            }
-
+            yield return new WaitForSeconds(_fireDelay);
 
         }
 
