@@ -166,6 +166,27 @@ public class GameControl : MonoBehaviour
         shieldHp = maxShielpHp;
 
     }
+
+    public void CollectResource()
+    {
+        StartCoroutine(IncrementResourceWithDelay(10));
+    }
+
+    private IEnumerator IncrementResourceWithDelay(int amount)
+    {
+        float delay = 0.02f;
+     
+        for (int i = 0; i < amount; i++)
+        {
+            resources++; 
+            yield return new WaitForSeconds(delay);
+        }
+    }
+
+    public void CollectIntel()
+    {
+        intel++;
+    }
     public void OnLevelWin()
     {
         // TODO implement "level won screen"

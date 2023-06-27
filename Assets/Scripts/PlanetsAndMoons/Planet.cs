@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
+using Random = UnityEngine.Random;
 
 public class Planet : MonoBehaviour
 {
@@ -27,6 +30,35 @@ public class Planet : MonoBehaviour
     void Update()
     {
         transform.RotateAround(target.transform.position, Vector3.forward, _degPerSec * Time.deltaTime);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+
+        // When an enemy hits, get their damage stats and apply them
+        if (other.CompareTag("Enemy"))
+        {
+            EnemyBehaviour enemy = other.gameObject.GetComponent<EnemyBehaviour>();
+            if (enemy != null)
+            {
+                GameControl.control.DamagePlayer(enemy.GetDamageStats());
+                Destroy(other.gameObject);
+            }        
+        }
+
+        if (other.CompareTag("Resource"))
+        {
+            GameControl.control.CollectResource();
+            Destroy(other.gameObject);
+        }
+
+        if (other.CompareTag("Intel"))
+        {
+            GameControl.control.CollectIntel();
+            Destroy(other.gameObject);
+        }
+
+
     }
 
 

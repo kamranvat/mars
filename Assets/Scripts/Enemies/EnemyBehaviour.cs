@@ -97,8 +97,7 @@ public class EnemyBehaviour : MonoBehaviour
 
         if (other.CompareTag("Planet"))
         {
-            GameControl.control.DamagePlayer(Tuple.Create(_damage, _bypass, _emp));
-            Destroy(gameObject);
+            
         }
 
         // If they spawn on top of each other, push each other away so that the groups look nice
@@ -109,9 +108,7 @@ public class EnemyBehaviour : MonoBehaviour
             other.gameObject.GetComponent<Rigidbody2D>().velocity += direction.normalized * _pushApart;
         }
 
-        // For now, destroy after collision 
         // TODO: enemy health bar
-        //Destroy(gameObject);
 
     }
 
@@ -197,6 +194,11 @@ public class EnemyBehaviour : MonoBehaviour
         // Apply random rotation
         float randomRotation = Random.Range(0f, 360f);
         rigidbody2D.angularVelocity = randomRotation;
+    }
+
+    public Tuple<float, float, bool> GetDamageStats()
+    {
+        return Tuple.Create(_damage, _bypass, _emp);
     }
 
     // TODO: Enemies that shoot:
