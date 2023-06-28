@@ -50,6 +50,7 @@ public class GameControl : MonoBehaviour
     // Functional
     public bool isPlayerAlive = true;
     private float shieldRechargeTimer;
+    public float gravityStrength = 1; // For collectables
 
 
     void Awake()
@@ -105,6 +106,10 @@ public class GameControl : MonoBehaviour
         {
             Load();
         }
+
+        GUI.Label(new Rect(10, 10, 180, 30), "Resources: " + resources);
+        GUI.Label(new Rect(10, 10, 200, 30), "Intel: " + intel);
+        GUI.Label(new Rect(10, 10, 220, 30), "aaaaa: " );
     }
 
     public void Save()
@@ -124,7 +129,7 @@ public class GameControl : MonoBehaviour
 
     public void Load()
     {
-         if (File.Exists(Application.persistentDataPath + "/playerInfo.dat"))
+        if (File.Exists(Application.persistentDataPath + "/playerInfo.dat"))
         {
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.dat", FileMode.Open);
@@ -136,6 +141,7 @@ public class GameControl : MonoBehaviour
             intel = data.intel;
         }
     }
+
 
     public float Shield(Tuple<float, float, bool> damageTuple)
     {
@@ -217,8 +223,9 @@ public class GameControl : MonoBehaviour
         // reset playerHp
         // reset playerShield
         
-        // CHANGE SCENE HERE (maybe separate fct)
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        // CHANGE SCENE HERE (make separate fct, handle prologue/epilogue with this)
+        // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
         // call upgrade menu thing maybe?
         // maybe just make that another scene
         // placeholder for now
@@ -245,11 +252,12 @@ public class GameControl : MonoBehaviour
                 zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
                 break;
             case LevelPhase.Fight:
+                gravityStrength = 1;
                 // Start the fight phase
                 break;
             case LevelPhase.Outro:
+                gravityStrength = 10;
                 // Start the outro phase
-                // set resourcegravity to high
                 break;
         }
     }

@@ -59,8 +59,6 @@ public class EnemySpawner : MonoBehaviour
 
         float t = 0f;
 
-        Debug.Log(message: "Wave health init...");
-
         for (int i = 0; i < length; i++)
         {
             float value = Mathf.Lerp(0f, level_hp, t); // interpolate value between 0 and total
@@ -72,7 +70,6 @@ public class EnemySpawner : MonoBehaviour
         // handle rounding error by adding remaining value to last element
         distr[length - 1] += level_hp;
 
-        Debug.Log(message: "Wave health initialized. Values: " + distr);
         return distr;
 
     }
@@ -164,8 +161,7 @@ public class EnemySpawner : MonoBehaviour
         while (_levelSpawnedHp < _levelTotalHp)
         {
 
-            // TODO handle player death 
-            while ((currentWaveNr < currentLevelWaves.Length) || (GameControl.control.enemiesRemaining > 0)) // TODO check whether this is good logic or i need to put enemiesRemaining into a separate while loop
+            while (currentWaveNr < currentLevelWaves.Length)
             {
                 
                 // Spawn groups in regular intervals until the wave is over
@@ -194,10 +190,14 @@ public class EnemySpawner : MonoBehaviour
 
         }
 
+        while (GameControl.control.enemiesRemaining > 0)
+        {
+            yield return new WaitForSeconds(1f);
+        }
+
         GameControl.control.OnFightWin();
         Debug.Log(message: "level increased to " + GameControl.control.currentLevel);
         yield return null;
-
     }
 
 }
