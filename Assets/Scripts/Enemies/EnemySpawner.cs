@@ -17,15 +17,15 @@ public class EnemySpawner : MonoBehaviour
     private int _groupSize = 5;
 
     [SerializeField] // for debugging, read these values out of a list later
-    private int _levelTotalHp = 1000;
+    private int levelTotalHp = 1000;
     [SerializeField]
-    private float _levelSpawnedHp = 0;
+    private float levelSpawnedHp = 0;
 
     [SerializeField]
-    private int _currentWave = 1;
+    private int _currentWave = 0;
 
     [SerializeField]
-    private int[] _levelDifficulties = new int[] { 100, 200, 300, 400 };
+    private int[] _levelDifficulties = new int[] { 1000, 2000, 3000, 4000, 5000, 6000, 7000 };
 
 
 
@@ -35,19 +35,8 @@ public class EnemySpawner : MonoBehaviour
     void Start()
     {       
         enemyBehaviour = _enemyPrefab.GetComponent<EnemyBehaviour>();
-
-        // Todo: on player death, stop coroutine (in update function)
-        spawner = SpawnWaves();
-        StartCoroutine(spawner);
     }
 
-    void Update()
-    {
-        if (GameControl.control.isPlayerAlive == false)
-        {
-            StopSpawning();
-        }
-    }
 
     private int[] waveHealthDistribution(int length, int level_hp)
     {
@@ -93,7 +82,7 @@ public class EnemySpawner : MonoBehaviour
             // Spawn at spawnpoint plus random offset
             Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
-            _levelSpawnedHp += memberHp;
+            levelSpawnedHp += memberHp;
             GameControl.control.enemiesRemaining++;
         }
     }
@@ -125,10 +114,19 @@ public class EnemySpawner : MonoBehaviour
         return isAlive;
     }
     
+
+    public void StartSpawning()
+    {
+        levelSpawnedHp = 0f;
+        levelTotalHp = _levelDifficulties[GameControl.control.currentLevel];
+        spawner = SpawnWaves();
+        StartCoroutine(spawner);
+    }
+
     public void StopSpawning()
     {
         StopCoroutine(spawner);
-        // TODO add "you died" message
+        Debug.Log("Stop spawning called.");
     }
 
     // Spawns waves of enemies based only on current level:
@@ -137,12 +135,12 @@ public class EnemySpawner : MonoBehaviour
         // current level stats
         float enemyHp = enemyBehaviour.maxHp; //should be fine up here for one enemy type - check once others are added
         int waveAmount = GameControl.control.currentLevel / 2 + 1;
-        int[] currentLevelWaves = waveHealthDistribution(waveAmount, _levelTotalHp);
+        int[] currentLevelWaves = waveHealthDistribution(waveAmount, levelTotalHp);
         int currentWaveNr = 0;
         
-        Debug.Log("currentLevelWaves[0] and currentLevel:");
-        Debug.Log(currentLevelWaves[0]);
-        Debug.Log(GameControl.control.currentLevel);
+        //Debug.Log("currentLevelWaves[0] and currentLevel:");
+        //Debug.Log(currentLevelWaves[0]);
+        //Debug.Log(GameControl.control.currentLevel);
 
 
         //also have different types of groups later to spawn different swarms
@@ -158,7 +156,7 @@ public class EnemySpawner : MonoBehaviour
          */
 
         // Make the waves.
-        while (_levelSpawnedHp < _levelTotalHp)
+        while (levelSpawnedHp < levelTotalHp)
         {
 
             while (currentWaveNr < currentLevelWaves.Length)
@@ -181,7 +179,6 @@ public class EnemySpawner : MonoBehaviour
                     yield return new WaitForSeconds(_delay); // delay between groups
                 }
 
-
                 Debug.Log("wave over");
                 currentWaveNr++;
                 yield return new WaitForSeconds(_delay*2); // delay between waves
@@ -196,7 +193,6 @@ public class EnemySpawner : MonoBehaviour
         }
 
         GameControl.control.OnFightWin();
-        Debug.Log(message: "level increased to " + GameControl.control.currentLevel);
         yield return null;
     }
 

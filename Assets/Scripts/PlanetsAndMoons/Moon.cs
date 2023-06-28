@@ -19,8 +19,6 @@ public class Moon : MonoBehaviour
     [SerializeField]
     private float _degPerSec;
 
-    private int _lives = 5;
-
     void Start()
     {
         randomAttach();

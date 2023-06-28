@@ -6,7 +6,7 @@ using System;
 public class Explosion : MonoBehaviour
 {
     [SerializeField]
-    private float _duration = 1f;
+    private float _duration = 0.3f;
     [SerializeField]
     private float _damage = 10;
     [SerializeField]

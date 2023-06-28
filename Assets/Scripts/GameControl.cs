@@ -20,6 +20,10 @@ public class GameControl : MonoBehaviour
     // Turrets to save game state
     private TurretManager turretManager;
 
+    // EnemySpawner to control start of fight phase
+    // TODO maybe call stopspawning from here aswell
+    private EnemySpawner enemySpawner;
+
     // Player stats
     public float maxPlayerHp;
     public float playerHp;
@@ -67,6 +71,8 @@ public class GameControl : MonoBehaviour
         }
 
         zoomController = FindObjectOfType<CameraZoomController>();
+        enemySpawner = FindObjectOfType<EnemySpawner>();
+        turretManager = FindObjectOfType<TurretManager>();
     }
 
     private void Update()
@@ -97,9 +103,9 @@ public class GameControl : MonoBehaviour
     {
         GUI.Label(new Rect(10, 10, 100, 30), "Health: " + playerHp);
 
-        if(GUI.Button(new Rect(10,100, 100, 30), "Save"))
+        if(GUI.Button(new Rect(10,100, 100, 30), "advance game phase"))
         {
-            Save();
+            AdvanceToNextPhase();
         }
 
         if (GUI.Button(new Rect(10, 150, 100, 30), "Load"))
@@ -107,9 +113,9 @@ public class GameControl : MonoBehaviour
             Load();
         }
 
-        GUI.Label(new Rect(10, 10, 180, 30), "Resources: " + resources);
-        GUI.Label(new Rect(10, 10, 200, 30), "Intel: " + intel);
-        GUI.Label(new Rect(10, 10, 220, 30), "aaaaa: " );
+        GUI.Label(new Rect(10, 160, 100, 30), "Resources: " + resources);
+        GUI.Label(new Rect(10, 170, 100, 30), "Intel: " + intel);
+        GUI.Label(new Rect(10, 180, 100, 30), "aaaaa: " );
     }
 
     public void Save()
@@ -119,6 +125,7 @@ public class GameControl : MonoBehaviour
         FileStream file = File.Create(Application.persistentDataPath + "/playerInfo.dat");
 
         PlayerData data = new PlayerData();
+        //List<TurretData> turretList = turretManager.GetTurrets();
         data.Turrets = turretManager.GetTurrets();
         data.resources = resources;
         data.intel = intel;
@@ -220,17 +227,12 @@ public class GameControl : MonoBehaviour
     public void StartLevel()
     {
         // All the things that are needed at start:
-        // reset playerHp
-        // reset playerShield
         
         // CHANGE SCENE HERE (make separate fct, handle prologue/epilogue with this)
         // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
-        // call upgrade menu thing maybe?
-        // maybe just make that another scene
-        // placeholder for now
         currentLevelPhase = LevelPhase.Upgrade;
-        Debug.Log("UPGRADE MENU PLACEHOLDER ");
+        
 
         playerHp = maxPlayerHp;
         shieldHp = maxShielpHp;
@@ -248,13 +250,18 @@ public class GameControl : MonoBehaviour
             case LevelPhase.Upgrade:
                 // LOAD TURRET LIST HERE, SET TURRETS TO LIST
                 Load();
-                Debug.Log("Loaded");
+                Debug.Log("Loaded");     
                 zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
+                Debug.Log("UPGRADE MENU PLACEHOLDER ");
                 break;
+
             case LevelPhase.Fight:
                 gravityStrength = 1;
+                Debug.Log("Start fucking spawning");
+                enemySpawner.StartSpawning();
                 // Start the fight phase
                 break;
+
             case LevelPhase.Outro:
                 gravityStrength = 10;
                 // Start the outro phase
@@ -278,7 +285,7 @@ public class GameControl : MonoBehaviour
                 // Show level won screen
                 // set resourcegravity back to normal, destroy all remaining resources
                 Save();
-                Debug.Log("Saved game");
+                Debug.Log("LEVEL WON PLACEHOLDER");
                 break;
         }
     }
@@ -292,16 +299,22 @@ public class GameControl : MonoBehaviour
         switch (currentLevelPhase)
         {
             case LevelPhase.Upgrade:
+                Debug.Log("Advance to fight phase");
                 currentLevelPhase = LevelPhase.Fight;
                 break;
             case LevelPhase.Fight:
+                Debug.Log("Advance to outro phase");
                 currentLevelPhase = LevelPhase.Outro;
                 break;
             case LevelPhase.Outro:
                 Debug.Log("Level " + currentLevel + " done.");
                 currentLevel++;
+                currentLevelPhase = LevelPhase.Upgrade;
                 break;
         }
+
+        // Start the next phase
+        StartPhase(currentLevelPhase);
     }
 
     public void CollectResource()
@@ -349,6 +362,7 @@ public class GameControl : MonoBehaviour
     {
         //Debug.Log("Skill issue");
         isPlayerAlive = false;
+        enemySpawner.StopSpawning();
         RestartLevel();
     }
 }

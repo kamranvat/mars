@@ -57,7 +57,7 @@ public class CameraZoomController : MonoBehaviour
 
     public void ZoomIn(float zoomLevel, Vector2 position)
     {
-        Debug.Log((originalZoomLevel - zoomLevel)/(transform.position.magnitude - position.magnitude));
+        //Debug.Log((originalZoomLevel - zoomLevel)/(transform.position.magnitude - position.magnitude));
         targetZoomLevel = Mathf.Clamp(zoomLevel, minimumZoomLevel, maximumZoomLevel);
         targetPosition = position;
         shouldZoomIn = true;
