@@ -24,7 +24,6 @@ public class Planet : MonoBehaviour
     void Start()
     {
         randomAttach();
-
     }
 
     void Update()

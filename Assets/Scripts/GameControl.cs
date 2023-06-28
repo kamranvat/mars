@@ -240,6 +240,7 @@ public class GameControl : MonoBehaviour
         switch (phase)
         {
             case LevelPhase.Upgrade:
+                // LOAD TURRET LIST HERE, SET TURRETS TO LIST
                 zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
                 break;
             case LevelPhase.Fight:
@@ -258,6 +259,7 @@ public class GameControl : MonoBehaviour
         switch (phase)
         {
             case LevelPhase.Upgrade:
+                // GRAB UPDATED TURRET LIST; SET TURRETS TO LIST
                 zoomController.ZoomOut();
                 break;
             case LevelPhase.Fight:

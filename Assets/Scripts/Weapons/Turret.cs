@@ -9,19 +9,26 @@ public class Turret : MonoBehaviour
 {
 
     //vars
+    public TurretType turretType = TurretType.Normal;
+
+    private int turretLevel = 0;
     [SerializeField]
-    private int _range = 59;
+    private int range = 50;
     [SerializeField]
-    private GameObject _bulletPrefab;
+    private GameObject _bulletLevel0;
     [SerializeField]
-    private float _rateOfFire = 10;
+    private GameObject _bulletLevel1;
+    [SerializeField]
+    private GameObject _bulletLevel2;
+    private GameObject bullet;
+    [SerializeField]
+    private float rateOfFire = 10;
     [SerializeField]
     private float _rateOfScan = 10; // if no enemy is present, how often per s should we check for enemies
 
-    [SerializeField]
-    private float _fireAngle = 180;
     void Start()
     {
+        SetStats();
         StartCoroutine(Shoot());
     }
 
@@ -32,7 +39,7 @@ public class Turret : MonoBehaviour
 
     public GameObject GetClosestEnemy()
     {
-        float closest = _range;
+        float closest = range;
         GameObject closestEnemy = null;
         GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
 
@@ -52,7 +59,7 @@ public class Turret : MonoBehaviour
 
     public GameObject GetClosestEnemyInArc()
     {
-        float closest = _range;
+        float closest = range;
         GameObject closestEnemy = null;
         GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
 
@@ -71,10 +78,38 @@ public class Turret : MonoBehaviour
         return closestEnemy;
     }
 
+    private void SetStats()
+    {
+        switch (turretLevel)
+        {
+            case 0:
+                range = 30;
+                bullet = _bulletLevel0;
+                rateOfFire = 8;
+                break;
+            case 1:
+                range = 40;
+                bullet = _bulletLevel1;
+                rateOfFire = 10;
+                break;
+            case 2:
+                range = 50;
+                bullet = _bulletLevel2;
+                rateOfFire = 12;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void SetTurretLevel(int level)
+    {
+        turretLevel = level;
+    }
 
     IEnumerator Fire()
     {
-        float _fireDelay = 1 / _rateOfFire;
+        float _fireDelay = 1 / rateOfFire;
         float _scanDelay = 1 / _rateOfScan;
 
         while (true)
@@ -85,7 +120,7 @@ public class Turret : MonoBehaviour
             {
                 // Spawn bullet above turret
                 Vector3 spawnPos = transform.position + transform.forward.normalized;
-                Instantiate(_bulletPrefab, spawnPos, transform.rotation);
+                Instantiate(_bulletLevel1, spawnPos, transform.rotation);
 
                 yield return new WaitForSeconds(_fireDelay);
 
@@ -102,7 +137,7 @@ public class Turret : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        float _fireDelay = 1 / _rateOfFire;
+        float _fireDelay = 1 / rateOfFire;
         float _scanDelay = 1 / _rateOfScan;
 
         while (true)
@@ -121,7 +156,7 @@ public class Turret : MonoBehaviour
 
                 // Spawn bullet above turret
                 Vector3 spawnPos = transform.position + transform.forward.normalized;
-                Instantiate(_bulletPrefab, spawnPos, transform.rotation);
+                Instantiate(_bulletLevel1, spawnPos, transform.rotation);
 
                 yield return new WaitForSeconds(_fireDelay);
 
@@ -139,7 +174,7 @@ public class Turret : MonoBehaviour
     
     IEnumerator ShootAtCursor()
     {
-        float _fireDelay = 1 / _rateOfFire;
+        float _fireDelay = 1 / rateOfFire;
         float _scanDelay = 1 / _rateOfScan;
 
         while (true)
@@ -153,7 +188,7 @@ public class Turret : MonoBehaviour
             //Vector3 spawnPos = transform.position + direction.normalized * 2f;
 
             Vector3 spawnPos = transform.position + transform.forward.normalized;
-            Instantiate(_bulletPrefab, spawnPos, transform.rotation);
+            Instantiate(_bulletLevel1, spawnPos, transform.rotation);
 
             yield return new WaitForSeconds(_fireDelay);
 

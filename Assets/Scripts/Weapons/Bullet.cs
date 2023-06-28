@@ -13,15 +13,11 @@ public class Bullet : MonoBehaviour
     [SerializeField]
     private Rigidbody2D RB;
 
-    [SerializeField]
-    private float maxFireAngle = 90;
-        
     private Vector2 direction;
     private Vector2 startingPosition;
 
     private void Start()
     {
-        //Aim();
         // Store starting position for MaxRange()
         startingPosition = transform.position;
     }
@@ -56,7 +52,6 @@ public class Bullet : MonoBehaviour
             Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
             transform.rotation = rotation;
         }
-
     }
 
     public GameObject GetClosestEnemyInArc()

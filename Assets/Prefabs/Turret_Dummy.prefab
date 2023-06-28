@@ -97,7 +97,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17c25cfb880e2494988906c62b551a00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _range: 50
-  _bulletPrefab: {fileID: 7754124459365904026, guid: 0daab6c41c832d44880c1a9c8abd37a6, type: 3}
-  _rateOfFire: 5
+  turretType: 0
+  turretLevel: 0
+  range: 50
+  _bulletLevel0: {fileID: 7754124459365904026, guid: 0daab6c41c832d44880c1a9c8abd37a6, type: 3}
+  _bulletLevel1: {fileID: 7754124459365904026, guid: 4470f3a06bc4f4f4c996c2237862546a, type: 3}
+  _bulletLevel2: {fileID: 7754124459365904026, guid: 4470f3a06bc4f4f4c996c2237862546a, type: 3}
+  rateOfFire: 10
   _rateOfScan: 15
