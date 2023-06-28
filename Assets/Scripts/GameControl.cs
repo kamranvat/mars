@@ -17,6 +17,9 @@ public class GameControl : MonoBehaviour
     private Vector2 _upgradeZoomPosition = new Vector2(5f, 0f);
     private float _upgradeZoomLevel = 5f;
 
+    // Turrets to save game state
+    private TurretManager turretManager;
+
     // Player stats
     public float maxPlayerHp;
     public float playerHp;
@@ -95,26 +98,23 @@ public class GameControl : MonoBehaviour
 
         if(GUI.Button(new Rect(10,100, 100, 30), "Save"))
         {
-            GameControl.control.Save();
+            Save();
         }
 
         if (GUI.Button(new Rect(10, 150, 100, 30), "Load"))
         {
-            GameControl.control.Load();
+            Load();
         }
     }
 
     public void Save()
     {
-        // TODO modify to save at end of each level
-        // TODO maybe add different saves and a main menu
         // Save the information in this script to the device
         BinaryFormatter bf = new BinaryFormatter();
         FileStream file = File.Create(Application.persistentDataPath + "/playerInfo.dat");
 
         PlayerData data = new PlayerData();
-        data.hp = playerHp;
-        data.shield = shieldHp;
+        data.Turrets = turretManager.GetTurrets();
         data.resources = resources;
         data.intel = intel;
 
@@ -131,8 +131,7 @@ public class GameControl : MonoBehaviour
             PlayerData data = (PlayerData)bf.Deserialize(file);
             file.Close();
 
-            playerHp = data.hp;
-            shieldHp = data.shield;
+            turretManager.SetTurrets(data.Turrets);
             resources = data.resources; 
             intel = data.intel;
         }
@@ -241,6 +240,8 @@ public class GameControl : MonoBehaviour
         {
             case LevelPhase.Upgrade:
                 // LOAD TURRET LIST HERE, SET TURRETS TO LIST
+                Load();
+                Debug.Log("Loaded");
                 zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
                 break;
             case LevelPhase.Fight:
@@ -268,6 +269,8 @@ public class GameControl : MonoBehaviour
             case LevelPhase.Outro:
                 // Show level won screen
                 // set resourcegravity back to normal, destroy all remaining resources
+                Save();
+                Debug.Log("Saved game");
                 break;
         }
     }
@@ -318,7 +321,7 @@ public class GameControl : MonoBehaviour
     {
         // TODO implement "level won screen"
         // with a START LEVEL N+1 button
-        Debug.Log("On Level Win called.");
+        Debug.Log("On Fight Win called.");
         AdvanceToNextPhase();
     }
 
@@ -347,8 +350,7 @@ public class GameControl : MonoBehaviour
 class PlayerData
 {
     // TODO .get this stuff and such, data security wise (look up)
-    public float hp;
-    public float shield;
+    public List<TurretData> Turrets;
     public float resources;
     public int intel;
     public int currentLevel;
