@@ -23,7 +23,7 @@ public class EnemyBehaviour : MonoBehaviour
     [SerializeField]
     private float _shieldHp = 10;
     [SerializeField]
-    public float maxHp = 20;
+    public int maxHp = 20;
     private float _hp;
     
 
