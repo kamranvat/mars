@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -10,11 +11,13 @@ public class EnemySpawner : MonoBehaviour
 
     [SerializeField]
     private GameObject _enemyPrefab;
-
-    [SerializeField]
-    private float _delay = 5f;
     [SerializeField]
     private int _groupSize = 5;
+    [SerializeField]
+    private float _groupDelay = 5f;
+    [SerializeField]
+    private float _waveDelay = 10f;
+
 
     [SerializeField] // for debugging, read these values out of a list later
     private int levelTotalHp = 1000;
@@ -22,7 +25,7 @@ public class EnemySpawner : MonoBehaviour
     private float levelSpawnedHp = 0;
 
     [SerializeField]
-    private int _currentWave = 0;
+    private int currentWave = 0;
 
     [SerializeField]
     private int[] _levelDifficulties = new int[] { 1000, 2000, 3000, 4000, 5000, 6000, 7000 };
@@ -38,9 +41,9 @@ public class EnemySpawner : MonoBehaviour
     }
 
 
-    private int[] waveHealthDistribution(int length, int level_hp)
+    private int[] WaveHealthDistribution(int length, int levelHp)
     {
-        // Returns an array[length] of values that sum up to level_hp, representing the total playerHp of each wave in this level.
+        // Returns an array[length] of values that sum up to levelHp, representing the total playerHp of each wave in this level.
         // Values are taken from a linear function and normalised such that each wave is stronger than the previous
 
         int[] distr = new int[length];
@@ -50,29 +53,30 @@ public class EnemySpawner : MonoBehaviour
 
         for (int i = 0; i < length; i++)
         {
-            float value = Mathf.Lerp(0f, level_hp, t); // interpolate value between 0 and total
+            float value = Mathf.Lerp(0f, levelHp, t); // interpolate value between 0 and total
             distr[i] = Mathf.RoundToInt(value); // round to integer
-            level_hp -= distr[i]; // subtract from total
+            levelHp -= distr[i]; // subtract from total
             t += step; // increment interpolation value
         }
 
         // handle rounding error by adding remaining value to last element
-        distr[length - 1] += level_hp;
+        distr[length - 1] += levelHp;
 
         return distr;
 
     }
 
-    private void spawnGroupSelector()
+    private void SpawnGroupSelector()
     {
         // Have another fct that decides which enemy types are "active" (e.g. can attack) based on the level.
         // Pass the list of active enemies (string[]) in here, choose one at random,
-        // and call spawnGroup with the right parameters 
+        // and call SpawnGroup with the right parameters 
     }
 
-    private void spawnGroup(int memberAmount, float memberHp, Vector2 spawnPoint, GameObject objectToSpawn)
+    private void SpawnGroup(int memberAmount, Vector2 spawnPoint, GameObject objectToSpawn)
     {
         float dist = 5f;
+        float memberHp = enemyBehaviour.maxHp;
 
         // TODO: make random velocity, assign to each member  within the for loop
         //give each group a (similar between members) initial velocity parallel to the circle defined
@@ -80,7 +84,7 @@ public class EnemySpawner : MonoBehaviour
         for (int i = 0; i <= memberAmount; i++)
         {
             // Spawn at spawnpoint plus random offset
-            Vector2 position = spawnPoint + new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)) * dist;
+            Vector2 position = spawnPoint + new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)) * dist;
             Instantiate(objectToSpawn, position, Quaternion.identity);
             levelSpawnedHp += memberHp;
             GameControl.control.enemiesRemaining++;
@@ -89,7 +93,7 @@ public class EnemySpawner : MonoBehaviour
 
 
     // TODO: build functionality
-    private Vector2 chooseSpawnpoint()
+    private Vector2 ChooseSpawnpoint()
     {
         //TODO make it choose one spawnpoint at random
         //TODO define spawn points as game corners plus random spread range plus one
@@ -105,7 +109,7 @@ public class EnemySpawner : MonoBehaviour
     }
 
     // TODO: build functionality
-    private bool isWaveAlive()
+    private bool IsWaveAlive()
     {
         // returns false if there are no living enemies on the map
         // remember that this can be false during a level (in between waves)
@@ -135,18 +139,11 @@ public class EnemySpawner : MonoBehaviour
         // current level stats
         float enemyHp = enemyBehaviour.maxHp; //should be fine up here for one enemy type - check once others are added
         int waveAmount = GameControl.control.currentLevel / 2 + 1;
-        int[] currentLevelWaves = waveHealthDistribution(waveAmount, levelTotalHp);
-        int currentWaveNr = 0;
-        
-        //Debug.Log("currentLevelWaves[0] and currentLevel:");
-        //Debug.Log(currentLevelWaves[0]);
-        //Debug.Log(GameControl.control.currentLevel);
-
-
+        int[] currentLevelWaves = WaveHealthDistribution(length:waveAmount, levelHp:levelTotalHp);
+        currentWave = 0;
         //also have different types of groups later to spawn different swarms
         // TODO group selector fct that selects the spawn group and spawns it with the right vals
 
-        // IN CONCLUSION 
         // what I want is:
         /* For each level spawn waveAmount waves
          *      for each wave spawn x groups
@@ -155,37 +152,37 @@ public class EnemySpawner : MonoBehaviour
          * groups are manually defined, such that they are similarly strong but feel different
          */
 
-        // Make the waves.
-        while (levelSpawnedHp < levelTotalHp)
+        while (currentWave < waveAmount)
         {
+            int waveHp = currentLevelWaves[currentWave];
+            StartCoroutine(SpawnSingleWave(waveHp));
+            currentWave++;
 
-            while (currentWaveNr < currentLevelWaves.Length)
+            yield return new WaitForSeconds(_waveDelay);
+            /* Spawn groups in regular intervals until the wave is over
+            float waveSpawnedHp = 0; 
+            int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
+
+            while ((waveSpawnedHp < waveHp))
             {
-                
-                // Spawn groups in regular intervals until the wave is over
-                float spawnedHp = 0; 
-                int waveHp = currentLevelWaves[currentWaveNr]; // max HP for this wave
 
-                while ((spawnedHp < waveHp))
-                {
+                //spawnedEnemies.Add(SpawnGroup(5, ChooseSpawnpoint(), _enemyPrefab)); // TODO replace this with SpawnGroupSelector once implemented
+                SpawnGroup(memberAmount:_groupSize, memberHp:enemyHp, spawnPoint:ChooseSpawnpoint(), objectToSpawn:_enemyPrefab);
+                waveSpawnedHp += enemyHp * _groupSize;
+                Debug.Log("spawned hp:" + waveSpawnedHp);
+                Debug.Log("wave" + currentWaveNr + "of " + currentLevelWaves.Length);
+                Debug.Log("Enemies Remaining: " + GameControl.control.enemiesRemaining);
 
-                    //spawnedEnemies.Add(spawnGroup(5, chooseSpawnpoint(), _enemyPrefab)); // TODO replace this with spawnGroupSelector once implemented
-                    spawnGroup(memberAmount:_groupSize, memberHp:enemyHp, spawnPoint:chooseSpawnpoint(), objectToSpawn:_enemyPrefab);
-                    spawnedHp += enemyHp * _groupSize;
-                    Debug.Log("spawned hp:" + spawnedHp);
-                    Debug.Log("wave" + currentWaveNr + "of " + currentLevelWaves.Length);
-                    Debug.Log("Enemies Remaining: " + GameControl.control.enemiesRemaining);
-
-                    yield return new WaitForSeconds(_delay); // delay between groups
-                }
-
-                Debug.Log("wave over");
-                currentWaveNr++;
-                yield return new WaitForSeconds(_delay*2); // delay between waves
-                
+                yield return new WaitForSeconds(_groupDelay); // delay between groups
             }
 
+            Debug.Log("wave over");
+            currentWaveNr++;
+            yield return new WaitForSeconds(_groupDelay*2); // delay between waves
+            */
         }
+
+        
 
         while (GameControl.control.enemiesRemaining > 0)
         {
@@ -196,5 +193,21 @@ public class EnemySpawner : MonoBehaviour
         yield return null;
     }
 
-}
+    private IEnumerator SpawnSingleWave(int waveHp)
+    {
+        // Spawn groups in regular intervals until the wave is over
+        float waveSpawnedHp = 0;
+        float memberHp = enemyBehaviour.maxHp;
 
+        while ((waveSpawnedHp < waveHp))
+        {
+            SpawnGroup(memberAmount: _groupSize, spawnPoint: ChooseSpawnpoint(), objectToSpawn: _enemyPrefab);
+            waveSpawnedHp += memberHp * _groupSize;
+
+            yield return new WaitForSeconds(_groupDelay);
+        }
+
+        Debug.Log("wave over");        
+        yield return new WaitForSeconds(_waveDelay); 
+    }
+}

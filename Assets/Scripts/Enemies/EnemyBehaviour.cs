@@ -205,7 +205,7 @@ public class EnemyBehaviour : MonoBehaviour
     IEnumerator Shoot() 
     {
         // TODO add a shoot coroutine here later
-        //float _delay = 1 / rateOfFire;
+        //float _groupDelay = 1 / rateOfFire;
         Vector2 target = _center;
 
         while (GameControl.control.isPlayerAlive)

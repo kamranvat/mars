@@ -36,7 +36,6 @@ public class GameControl : MonoBehaviour
     public float resources;
     public int intel;
 
-
     // Each level has three phases
     public enum LevelPhase
     {
@@ -257,7 +256,6 @@ public class GameControl : MonoBehaviour
 
             case LevelPhase.Fight:
                 gravityStrength = 1;
-                Debug.Log("Start fucking spawning");
                 enemySpawner.StartSpawning();
                 // Start the fight phase
                 break;
