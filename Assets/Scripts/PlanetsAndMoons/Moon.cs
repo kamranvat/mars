@@ -21,7 +21,7 @@ public class Moon : MonoBehaviour
 
     void Start()
     {
-        randomAttach();
+        RandomAttach();
     }
 
     private void FixedUpdate()
@@ -31,7 +31,7 @@ public class Moon : MonoBehaviour
 
 
     // Randomly populate with turrets (TODO change for player selection)
-    void randomAttach()
+    void RandomAttach()
     {
         for (int i = 0; i < attachedObjects.Length; i++)
         {

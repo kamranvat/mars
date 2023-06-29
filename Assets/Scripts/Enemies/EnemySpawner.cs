@@ -24,7 +24,7 @@ public class EnemySpawner : MonoBehaviour
     private int currentWave = 0;
 
     [SerializeField]
-    private int[] _levelDifficulties = new int[] { 1111, 2222, 9030, 4500, 11100, 6000, 7000 };
+    private int[] _levelDifficulties = new int[] {};
     [SerializeField]
     private int levelTotalHp;
     [SerializeField]

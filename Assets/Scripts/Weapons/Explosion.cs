@@ -16,7 +16,7 @@ public class Explosion : MonoBehaviour
 
     void Start()
     {
-        Invoke("DestroyExplosion", _duration);        
+        Invoke(nameof(DestroyExplosion), _duration);        
     }
 
     private void DestroyExplosion()

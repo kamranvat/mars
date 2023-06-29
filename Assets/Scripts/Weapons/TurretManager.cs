@@ -44,16 +44,3 @@ public class TurretManager : MonoBehaviour
 
 }
 
-[System.Serializable]
-public class TurretData
-{
-    public TurretType? turretType; 
-    public int upgradeLevel; 
-    public float turretValue;
-}
-
-public enum TurretType
-{
-    Normal,
-    Special
-}
