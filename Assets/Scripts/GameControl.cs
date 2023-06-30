@@ -17,6 +17,9 @@ public class GameControl : MonoBehaviour
     private Vector2 _upgradeZoomPosition = new Vector2(5f, 0f);
     private float _upgradeZoomLevel = 5f;
 
+    // UI elements
+    public GameObject upgradeMenu;
+
     // Turrets to save game state
     private TurretManager turretManager;
 
@@ -251,7 +254,7 @@ public class GameControl : MonoBehaviour
                 Load();
                 Debug.Log("Loaded");     
                 zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
-                Debug.Log("UPGRADE MENU PLACEHOLDER ");
+                ShowCanvas(upgradeMenu);
                 break;
 
             case LevelPhase.Fight:
@@ -273,7 +276,7 @@ public class GameControl : MonoBehaviour
         switch (phase)
         {
             case LevelPhase.Upgrade:
-                // GRAB UPDATED TURRET LIST; SET TURRETS TO LIST
+                HideCanvas(upgradeMenu);
                 zoomController.ZoomOut();
                 break;
             case LevelPhase.Fight:
@@ -362,6 +365,16 @@ public class GameControl : MonoBehaviour
         isPlayerAlive = false;
         enemySpawner.StopSpawning();
         RestartLevel();
+    }
+
+    public void ShowCanvas(GameObject canvas)
+    {
+        canvas.SetActive(true);
+    }
+
+    public void HideCanvas(GameObject canvas)
+    {
+        canvas.SetActive(false);
     }
 }
 

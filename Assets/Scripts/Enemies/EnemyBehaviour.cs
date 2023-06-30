@@ -25,6 +25,8 @@ public class EnemyBehaviour : MonoBehaviour
     [SerializeField]
     public int maxHp = 20;
     private float _hp;
+    [SerializeField]
+    private Healthbar _healthbar;
     
 
     // Damage:
@@ -45,6 +47,7 @@ public class EnemyBehaviour : MonoBehaviour
     {
         _hp = maxHp;
         _resourceAmount = Mathf.FloorToInt(maxHp / 10);
+        _healthbar.UpdateHealthBar(maxHp, _hp);
     }
 
     private void FixedUpdate()
@@ -77,8 +80,8 @@ public class EnemyBehaviour : MonoBehaviour
     {
         if (other.CompareTag("Bullet"))
         {
+            DamageEnemy(other.GetComponent<Bullet>().GetDamageStats());
             Destroy(other.gameObject);
-            HandleEnemyDeath();
         }
 
         if (other.CompareTag("Fuse"))
@@ -160,6 +163,7 @@ public class EnemyBehaviour : MonoBehaviour
     public void DamageEnemy(Tuple<float, float, bool> damageTuple)
     {
         _hp -= EnemyShield(damageTuple);
+        _healthbar.UpdateHealthBar(maxHp, _hp);
 
         if (_hp <= 0)
         {

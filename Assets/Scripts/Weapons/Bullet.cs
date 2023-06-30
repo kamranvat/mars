@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +10,12 @@ public class Bullet : MonoBehaviour
     private float _bulletSpeed = 1f;
     [SerializeField]
     private float _range;
+    [SerializeField]
+    private float _damage;
+    [SerializeField]
+    private float _bypass;
+    [SerializeField]
+    private bool _emp;
 
     [SerializeField]
     private Rigidbody2D RB;
@@ -36,6 +43,17 @@ public class Bullet : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    public void SetDamageStats(Tuple<float, float, bool> damageTuple)
+    {
+        _damage = damageTuple.Item1;
+        _bypass = damageTuple.Item2;
+        _emp = damageTuple.Item3;
+    }
+    public Tuple<float, float, bool> GetDamageStats()
+    {
+        return Tuple.Create(_damage, _bypass, _emp);
     }
 
     void Aim()

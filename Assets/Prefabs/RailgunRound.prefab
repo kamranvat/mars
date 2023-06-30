@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4968202945811825150}
   - component: {fileID: 2830511853059628292}
-  - component: {fileID: 7470118262675488564}
+  - component: {fileID: 4572827720164116991}
   - component: {fileID: -7361177632262922403}
   m_Layer: 0
   m_Name: RailgunRound
@@ -86,7 +86,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &7470118262675488564
+--- !u!114 &4572827720164116991
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,11 +95,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 7754124459365904026}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ddfbf80cadcbc142b980a84dcacce03, type: 3}
+  m_Script: {fileID: 11500000, guid: 92a54bcb4472771429fa70819cba1fe4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _bulletSpeed: 120
+  _bulletSpeed: 20
   _range: 40
+  _damage: 1
+  _bypass: 0.2
+  _emp: 0
   RB: {fileID: 0}
 --- !u!70 &-7361177632262922403
 CapsuleCollider2D:
