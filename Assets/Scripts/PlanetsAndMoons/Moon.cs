@@ -21,7 +21,7 @@ public class Moon : MonoBehaviour
 
     void Start()
     {
-        RandomAttach();
+        AttachAllObjects();
     }
 
     private void FixedUpdate()
@@ -30,14 +30,12 @@ public class Moon : MonoBehaviour
     }
 
 
-    // Randomly populate with turrets (TODO change for player selection)
-    void RandomAttach()
+    void AttachAllObjects()
     {
-        for (int i = 0; i < attachedObjects.Length; i++)
+        for (int i = 0; i < attachmentSlots.Length - 1; i++)
         {
-            // Instantiate a random selection from the 6 types to predefined locations on the wall
-            int randomType = Random.Range(0, attachedObjectTypes.Length);
-            AttachToPlanet(i, attachedObjectTypes[randomType]);
+            AttachToPlanet(i, attachedObjectTypes[i].gameObject);
+            Debug.Log("attached " + i);
         }
     }
 

@@ -11,7 +11,7 @@ public class Resource : MonoBehaviour
 
         // Increase pull the closer it gets to the center
         float distance = centerDirection.magnitude;
-        float scaledGravity = GameControl.control.gravityStrength * (1f / distance);
+        float scaledGravity = GameControl.Instance.gravityStrength * (1f / distance);
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         rb.AddForce(centerDirection.normalized * scaledGravity);

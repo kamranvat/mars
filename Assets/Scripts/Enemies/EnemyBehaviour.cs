@@ -46,7 +46,7 @@ public class EnemyBehaviour : MonoBehaviour
     private void Start()
     {
         _hp = maxHp;
-        _resourceAmount = Mathf.FloorToInt(maxHp / 10);
+        _resourceAmount = Mathf.FloorToInt(maxHp / 5);
         _healthbar.UpdateHealthBar(maxHp, _hp);
     }
 
@@ -100,7 +100,7 @@ public class EnemyBehaviour : MonoBehaviour
 
         if (other.CompareTag("Planet"))
         {
-            
+            HandleEnemyDeath();
         }
 
         // If they spawn on top of each other, push each other away so that the groups look nice
@@ -110,8 +110,6 @@ public class EnemyBehaviour : MonoBehaviour
             RB.AddForce(-direction.normalized * _pushApart);
             other.gameObject.GetComponent<Rigidbody2D>().velocity += direction.normalized * _pushApart;
         }
-
-        // TODO: enemy health bar
 
     }
 
@@ -173,7 +171,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     private void HandleEnemyDeath()
     {
-        GameControl.control.enemiesRemaining--;
+        GameControl.Instance.enemiesRemaining--;
         DropResources();
         Destroy(gameObject);
     }
@@ -212,7 +210,7 @@ public class EnemyBehaviour : MonoBehaviour
         //float _groupDelay = 1 / rateOfFire;
         Vector2 target = _center;
 
-        while (GameControl.control.isPlayerAlive)
+        while (GameControl.Instance.isPlayerAlive)
         {
             // Aim at center of screen
             Debug.Log(message: "target aquired: " + target);

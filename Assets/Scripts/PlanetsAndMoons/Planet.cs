@@ -11,7 +11,7 @@ public class Planet : MonoBehaviour
 
     // Attachments:
     [SerializeField]
-    private GameObject[] attachedObjectTypes; // Pool of object types to attach to the planet
+    public Turret[] turrets; // Pool of turrets to attach to the planet
     [SerializeField]
     private GameObject[] attachmentSlots;
 
@@ -23,7 +23,7 @@ public class Planet : MonoBehaviour
 
     void Start()
     {
-        randomAttach();
+        AttachAllObjects();
     }
 
     void Update()
@@ -40,35 +40,39 @@ public class Planet : MonoBehaviour
             EnemyBehaviour enemy = other.gameObject.GetComponent<EnemyBehaviour>();
             if (enemy != null)
             {
-                GameControl.control.DamagePlayer(enemy.GetDamageStats());
+                GameControl.Instance.DamagePlayer(enemy.GetDamageStats());
                 Destroy(other.gameObject);
             }        
         }
 
         if (other.CompareTag("Resource"))
         {
-            GameControl.control.CollectResource();
+            GameControl.Instance.CollectResource();
             Destroy(other.gameObject);
         }
 
         if (other.CompareTag("Intel"))
         {
-            GameControl.control.CollectIntel();
+            GameControl.Instance.CollectIntel();
             Destroy(other.gameObject);
         }
 
 
     }
 
-
-    // Randomly populate with turrets (TODO change for player selection)
-    void randomAttach()
+    public void SetTurretLevels(int[] levels)
     {
-        for (int i = 0; i < attachmentSlots.Length; i++)
+        for (int i = 0; i < attachmentSlots.Length - 1; i++)
         {
-            // Instantiate a random selection from the 6 types to predefined locations on the wall
-            int randomType = Random.Range(0, attachedObjectTypes.Length);
-            AttachToPlanet(i, attachedObjectTypes[randomType]);
+            turrets[i].turretLevel = levels[i];
+        }
+    }
+    void AttachAllObjects()
+    {
+        for (int i = 0; i < attachmentSlots.Length-1; i++)
+        { 
+            AttachToPlanet(i, turrets[i].gameObject);
+            Debug.Log("attached "+i);
         }
     }
 

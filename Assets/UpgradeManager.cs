@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.U2D.Path.GUIFramework;
 using UnityEngine;
 
 public class UpgradeManager : MonoBehaviour
 {
-    private int[] turretLevels = new int[11];
+    public static UpgradeManager Instance;
+
+    private int[] turretLevels = new int[9];
     private int shieldHpLevel;
     private int shieldRechargeLevel;
     private int playerHpLevel;
@@ -16,7 +19,8 @@ public class UpgradeManager : MonoBehaviour
     [SerializeField]
     private List<TurretSlot> turretSlotList = new List<TurretSlot>(); // List of turret slots
     [SerializeField]
-    private List<TurretData> turretDataList = new List<TurretData>(); // List of turret data
+    private Planet planet;
+
 
     // should contain for each upgradable thing a getlevel funtion, an upgrade function and a ismaxed function
     // should also contain a "setAllUpgrades" function that handles the calls to TurretManager and gameControl
@@ -24,25 +28,38 @@ public class UpgradeManager : MonoBehaviour
     // note on terminology: turret levels are referred to as such, whereas all other upgrades are just called upgrades 
     // (e.g. SetPlayerUpgrades does not set turrets)
 
-    // Start is called before the first frame update
-    void Start()
-    {
 
+    void Awake()
+    {
+        // Create this only if it does not exist yet
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+
+        planet = planet.GetComponent<Planet>();
+        Debug.Log(planet);
     }
 
 
     public void SetPlayerUpgrades()
     {
-        // Makes all the calls to instantiate all upgrades 
+
         // Set turrets:
+        planet.SetTurretLevels(turretLevels);
 
         // Set shieldHp:
-
+        GameControl.Instance.maxShielpHp = GetStatLevel("ShieldCap") * 100;
         // Set shield recharge stats:
-
+        GameControl.Instance.maxShielpHp = GetStatLevel("ShieldGen") * 10;
         // Set player hp:
-
+        GameControl.Instance.maxShielpHp = GetStatLevel("Health") * 100;
         // Set moon turrets:
+        // removed
     }
 
     public void GetPlayerUpgrades()
@@ -54,69 +71,95 @@ public class UpgradeManager : MonoBehaviour
         return turretLevels;
     }
 
-    public int GetStatLevel(string name)
+    public int GetStatLevel(string id)
     {
-        return name switch
+        return id switch
         {
-            "shieldHpLevel" => shieldHpLevel,
-            "shieldRechargeLevel" => shieldRechargeLevel,
-            "playerHpLevel" => playerHpLevel,
-            "phobosSiloLevel" => phobosSiloLevel,
-            "deimosSiloLevel" => deimosSiloLevel,
+            "ShieldCap" => shieldHpLevel,
+            "ShieldGen" => shieldRechargeLevel,
+            "Health" => playerHpLevel,
+            "Phobos" => phobosSiloLevel,
+            "Deimos" => deimosSiloLevel,
             _ => 0,
         };
     }
 
-    public bool CanTurretLevelUp(int id)
+    public bool CanStatUpgrade(string id) 
     {
-        return (turretLevels[id] < _maxLevel);
-    }
-
-    public bool CanStatUpgrade(string name) 
-    {
-        return name switch
+        return id switch
         {
-            "shieldHpLevel" => (shieldHpLevel < _maxLevel),
-            "shieldRechargeLevel" => (shieldRechargeLevel < _maxLevel),
-            "playerHpLevel" => (playerHpLevel < _maxLevel),
-            "phobosSiloLevel" => (phobosSiloLevel < _maxLevel),
-            "deimosSiloLevel" => (deimosSiloLevel < _maxLevel),
+            "ShieldCap" => (shieldHpLevel < _maxLevel && GameControl.Instance.resources >= 200),
+            "ShieldGen" => (shieldRechargeLevel < _maxLevel && GameControl.Instance.resources >= 200),
+            "Health" => (playerHpLevel < _maxLevel && GameControl.Instance.resources >= 200),
+            //"Phobos" => (phobosSiloLevel < _maxLevel && GameControl.Instance.resources >= 200),
+            //"Deimos" => (deimosSiloLevel < _maxLevel && GameControl.Instance.resources >= 200),
+            "Phobos" => (false),
+            "Deimos" => (false), // removed
             _ => false,
         };
+    }
+
+    public bool CanStatUpgrade(int id)
+    {
+        // For turrets
+        return (turretLevels[id] < _maxLevel && GameControl.Instance.resources >= 200);
     }
 
 
     public void UpgradeTurret(int id)
     {
         turretLevels[id]++;
+        GameControl.Instance.resources -= 200;
     }
        
 
-    public void UpgradeStat(string name)
+    public void UpgradeStat(string turretTitle)
     {
-        switch (name)
+        switch (GetTurretId(turretTitle))
         {
-            case "shieldHpLevel":
+            case "ShieldCap":
                 shieldHpLevel++;
+                GameControl.Instance.resources -= 200;
                 break;
 
-            case "shieldRechargeLevel":
+            case "ShieldGen":
                 shieldRechargeLevel++;
+                GameControl.Instance.resources -= 200;
                 break;
 
-            case "playerHpLevel":
+            case "Health":
                 playerHpLevel++;
+                GameControl.Instance.resources -= 200;
                 break;
 
-            case "phobosSiloLevel":
+            case "Phobos":
                 phobosSiloLevel++;
+                GameControl.Instance.resources -= 200;
                 break;
 
-            case "deimosSiloLevel":
+            case "Deimos":
                 deimosSiloLevel++;
+                GameControl.Instance.resources -= 200;
                 break;
         }
     }
+
+    public string GetTurretId(string turretTitle)
+    {
+        // Convert from title to id 
+        switch (turretTitle)
+        {
+            case "Maintenance Network":
+                return "Health";
+            case "Shield Generator":
+                return "ShieldGen";
+            case "Shield Capacitor":
+                return "ShieldCap";
+            default:
+                return string.Empty;
+        }
+    }
+
 
 
     // Get the list of turrets for UI or saving game state

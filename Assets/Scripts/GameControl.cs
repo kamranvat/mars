@@ -10,7 +10,11 @@ using UnityEngine.SceneManagement;
 public class GameControl : MonoBehaviour
 {
     // There can be only one
-    public static GameControl control;
+    public static GameControl Instance;
+
+    // Show start screen on first start
+    private bool firstStart = true;
+    public bool lastLevel = false;
 
     // Camera zoom for upgrade phase
     public CameraZoomController zoomController;
@@ -18,13 +22,16 @@ public class GameControl : MonoBehaviour
     private float _upgradeZoomLevel = 5f;
 
     // UI elements
-    public GameObject upgradeMenu;
+    public Canvas upgradeMenu;
+    public Canvas welcomeMenu;
+    public Canvas youDiedMenu;
+    public Canvas youWonMenu;
+    public Canvas gameWonMenu;
 
     // Turrets to save game state
     private TurretManager turretManager;
 
-    // EnemySpawner to control start of fight phase
-    // TODO maybe call stopspawning from here aswell
+    // EnemySpawner to Instance start of fight phase
     private EnemySpawner enemySpawner;
 
     // Player stats
@@ -34,6 +41,10 @@ public class GameControl : MonoBehaviour
     public float shieldHp;
     public float shieldRechargeDelay;
     public float shieldRechargeRate;
+
+    // Health and shield bar
+    [SerializeField] private Healthbar healthbar;
+    [SerializeField] private Healthbar shieldbar;
 
     // Inventory
     public float resources;
@@ -48,10 +59,9 @@ public class GameControl : MonoBehaviour
     }
 
     // Level info
-    public int currentLevel = 1;
+    public int currentLevel = 0;
     public int enemiesRemaining;
     private LevelPhase currentLevelPhase;
-    //private bool isPhaseDone = false;
 
     // Functional
     public bool isPlayerAlive = true;
@@ -59,27 +69,41 @@ public class GameControl : MonoBehaviour
     public float gravityStrength = 1; // For collectables
 
 
-    void Awake()
+    private void Awake()
     {
         // Create this only if it does not exist
-        if (control == null)
+        if (Instance != null && Instance != this)  
         {
-            DontDestroyOnLoad(gameObject);
-            control = this;
+            Destroy(this);
         }
-        else if (control == this)
+        else
         {
-            Destroy(gameObject);
+            Instance = this;
         }
 
         zoomController = FindObjectOfType<CameraZoomController>();
         enemySpawner = FindObjectOfType<EnemySpawner>();
         turretManager = FindObjectOfType<TurretManager>();
+
+        healthbar.UpdateHealthBar(maxPlayerHp, playerHp);
+        shieldbar.UpdateHealthBar(maxShielpHp, shieldHp);
+    }
+
+    private void Start()
+    {
+        Debug.Log("gamecontrol started");
+
+        HideCanvas(gameWonMenu);
+        HideCanvas(youWonMenu);
+        HideCanvas(youDiedMenu);
+        HideCanvas(welcomeMenu);
+        HideCanvas(upgradeMenu);
+        StartLevel();
     }
 
     private void Update()
     {
-        // Shield recharge:
+        // Shield recharge
         if (shieldRechargeTimer > 0f)
         {
             shieldRechargeTimer -= Time.deltaTime;
@@ -89,7 +113,11 @@ public class GameControl : MonoBehaviour
             ChargeShield();
         }
 
-        // Camera zoom:
+        // Update UI
+        healthbar.UpdateHealthBar(maxPlayerHp, playerHp);
+        shieldbar.UpdateHealthBar(maxShielpHp, shieldHp);
+
+        // Camera zoom
         if (Input.GetKeyDown(KeyCode.Space))
         {
             zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
@@ -99,25 +127,7 @@ public class GameControl : MonoBehaviour
         {
             zoomController.ZoomOut();
         }
-    }
 
-    void OnGUI()
-    {
-        GUI.Label(new Rect(10, 10, 100, 30), "Health: " + playerHp);
-
-        if(GUI.Button(new Rect(10,100, 100, 30), "advance game phase"))
-        {
-            AdvanceToNextPhase();
-        }
-
-        if (GUI.Button(new Rect(10, 150, 100, 30), "Load"))
-        {
-            Load();
-        }
-
-        GUI.Label(new Rect(10, 160, 100, 30), "Resources: " + resources);
-        GUI.Label(new Rect(10, 170, 100, 30), "Intel: " + intel);
-        GUI.Label(new Rect(10, 180, 100, 30), "aaaaa: " );
     }
 
     public void Save()
@@ -127,7 +137,6 @@ public class GameControl : MonoBehaviour
         FileStream file = File.Create(Application.persistentDataPath + "/playerInfo.dat");
 
         PlayerData data = new PlayerData();
-        //List<TurretData> turretList = turretManager.GetTurrets();
         data.Turrets = turretManager.GetTurrets();
         data.resources = resources;
         data.intel = intel;
@@ -227,19 +236,12 @@ public class GameControl : MonoBehaviour
     }
 
     public void StartLevel()
-    {
-        // All the things that are needed at start:
-        
-        // CHANGE SCENE HERE (make separate fct, handle prologue/epilogue with this)
-        // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-
-        currentLevelPhase = LevelPhase.Upgrade;
-        
-
+    {      
         playerHp = maxPlayerHp;
         shieldHp = maxShielpHp;
         shieldRechargeTimer = shieldRechargeDelay;
 
+        currentLevelPhase = LevelPhase.Upgrade;
         StartPhase(currentLevelPhase);
 
     }
@@ -250,22 +252,39 @@ public class GameControl : MonoBehaviour
         switch (phase)
         {
             case LevelPhase.Upgrade:
-                // LOAD TURRET LIST HERE, SET TURRETS TO LIST
                 Load();
-                Debug.Log("Loaded");     
                 zoomController.ZoomIn(_upgradeZoomLevel, _upgradeZoomPosition);
-                ShowCanvas(upgradeMenu);
+
+                if (firstStart)
+                {
+                    resources = 0;
+                    firstStart = false;
+                    ShowCanvas(welcomeMenu);
+                }
+                else
+                {
+                    ShowCanvas(upgradeMenu);
+                }                         
                 break;
 
             case LevelPhase.Fight:
                 gravityStrength = 1;
                 enemySpawner.StartSpawning();
-                // Start the fight phase
+                
                 break;
 
             case LevelPhase.Outro:
-                gravityStrength = 10;
-                // Start the outro phase
+
+                if (lastLevel)
+                {
+                    ShowCanvas(gameWonMenu);
+                } 
+                else
+                {
+                    gravityStrength = 20;
+                    ShowCanvas(youWonMenu);
+                }
+                
                 break;
         }
     }
@@ -276,22 +295,22 @@ public class GameControl : MonoBehaviour
         switch (phase)
         {
             case LevelPhase.Upgrade:
+                HideCanvas(welcomeMenu);
                 HideCanvas(upgradeMenu);
                 zoomController.ZoomOut();
                 break;
+
             case LevelPhase.Fight:
-                // Fade out fight HUD
                 break;
+
             case LevelPhase.Outro:
-                // Show level won screen
-                // set resourcegravity back to normal, destroy all remaining resources
                 Save();
-                Debug.Log("LEVEL WON PLACEHOLDER");
+                HideCanvas(youWonMenu);
                 break;
         }
     }
 
-    private void AdvanceToNextPhase()
+    public void AdvanceToNextPhase()
     {
         // End the current phase
         EndPhase(currentLevelPhase);
@@ -309,8 +328,16 @@ public class GameControl : MonoBehaviour
                 break;
             case LevelPhase.Outro:
                 Debug.Log("Level " + currentLevel + " done.");
-                currentLevel++;
-                currentLevelPhase = LevelPhase.Upgrade;
+                if(!lastLevel)
+                {
+                    currentLevel++;
+                    currentLevelPhase = LevelPhase.Upgrade;
+                }
+                else
+                {
+                    Application.Quit();
+                }
+                
                 break;
         }
 
@@ -341,40 +368,49 @@ public class GameControl : MonoBehaviour
 
     public void OnFightWin()
     {
-        // TODO implement "level won screen"
-        // with a START LEVEL N+1 button
         Debug.Log("On Fight Win called.");
         AdvanceToNextPhase();
     }
 
     public void RestartLevel()
     {
-        // TODO implement as follows:
-        // show a screen with two options
-        // START LEVEL N / RETURN TO MAIN MENU
-        // Note: this gets called a bunch of times
-        Debug.Log("Restarting");
-        // Reset stuff:
+        ClearEnemies();
+        HideCanvas(youDiedMenu);
         isPlayerAlive = true;
         StartLevel();
     }
 
     public void OnPlayerDeath() 
     {
-        //Debug.Log("Skill issue");
         isPlayerAlive = false;
         enemySpawner.StopSpawning();
-        RestartLevel();
+        youDiedMenu.enabled = true;
+        ShowCanvas(youDiedMenu);
     }
 
-    public void ShowCanvas(GameObject canvas)
+    public void ClearEnemies()
     {
-        canvas.SetActive(true);
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        foreach (GameObject enemy in enemies)
+        {
+            Destroy(enemy);
+        }
+    }
+    public void ShowCanvas(Canvas canvas)
+    {
+        canvas.enabled = true;
     }
 
-    public void HideCanvas(GameObject canvas)
+    public void HideCanvas(Canvas canvas)
     {
-        canvas.SetActive(false);
+        canvas.enabled = false;
+    }
+
+    public void QuitGame()
+    {
+        Save();
+        Application.Quit();
     }
 }
 
@@ -382,7 +418,6 @@ public class GameControl : MonoBehaviour
 [Serializable]
 class PlayerData
 {
-    // TODO .get this stuff and such, data security wise (look up)
     public List<TurretData> Turrets;
     public float resources;
     public int intel;

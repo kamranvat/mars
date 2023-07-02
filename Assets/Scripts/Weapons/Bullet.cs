@@ -56,22 +56,6 @@ public class Bullet : MonoBehaviour
         return Tuple.Create(_damage, _bypass, _emp);
     }
 
-    void Aim()
-    {
-
-        // Aim at closest Enemy
-        GameObject closestEnemy = GetClosestEnemyInArc();
-        if (closestEnemy != null)
-        {
-            // Calculate the direction to the closest enemy
-            Vector3 direction = closestEnemy.transform.position - transform.position;
-
-            // Rotate the bullet towards the closest object on the z-axis
-            Quaternion rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f);
-            transform.rotation = rotation;
-        }
-    }
-
     public GameObject GetClosestEnemyInArc()
     {
         float closest = _range;
@@ -94,24 +78,6 @@ public class Bullet : MonoBehaviour
         }
         return closestEnemy;
     }
-
-    // Gizmos for debugging
-    void OnDrawGizmos()
-    {
-        Color color;
-        color = Color.green;
-        // local up
-        DrawHelperAtCenter(this.transform.up, color, 2f);
-    }
-
-    private void DrawHelperAtCenter(
-                   Vector3 direction, Color color, float scale)
-    {
-        Gizmos.color = color;
-        Vector3 destination = transform.position + direction * scale;
-        Gizmos.DrawLine(transform.position, destination);
-    }
-
 
 
 }

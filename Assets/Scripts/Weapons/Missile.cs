@@ -10,12 +10,12 @@ public class Missile : MonoBehaviour
     private float _thrustPower = 0.2f;
     [SerializeField]
     private float _scanRate = 10f;
-    [SerializeField]
-    private float _range = 50;
+    private float _range = 20;
     [SerializeField]
     private float _launchPower = 100;
     [SerializeField]
     private float _launchDelay = 1f;
+    private float _explodeDelay = 1f;
     private float timer = 0;
     private bool timerReached = false;
     [SerializeField]
@@ -35,7 +35,7 @@ public class Missile : MonoBehaviour
         startingPosition = transform.position;
         // Launch outwards
         RB.AddForce(startingPosition * _launchPower);
-        new WaitForSeconds(_launchDelay);
+        new WaitForSeconds(_explodeDelay);
         StartCoroutine(Aim());
     }
 
@@ -106,8 +106,6 @@ public class Missile : MonoBehaviour
             //transform.position += transform.up * Time.deltaTime * _missileSpeed;
             RB.AddForce(transform.up * _thrustPower);
         }
-
-        // add top speed maybe
 
     }
 
